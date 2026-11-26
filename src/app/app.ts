@@ -1,6 +1,8 @@
+import { CdkDragDrop, CdkDropListGroup } from '@angular/cdk/drag-drop';
 import { Component, computed, effect, inject, signal, untracked, viewChild } from '@angular/core';
 import { addDays, formatDayHeader, formatWeekLabel, nextViewedWeek, startOfWeek, weekDates } from '../domain/dates';
-import { listOf } from '../domain/tickets';
+import { canDropInto } from '../domain/drop';
+import { listOf, moveTicket } from '../domain/tickets';
 import { FocusView } from './focus-view';
 import { TasksStore } from './tasks.store';
 import { TicketList } from './ticket-list';
@@ -8,7 +10,7 @@ import { WeekHeader } from './week-header';
 
 @Component({
   selector: 'app-root',
-  imports: [WeekHeader, TicketList, FocusView],
+  imports: [WeekHeader, TicketList, FocusView, CdkDropListGroup],
   template: `
     @if (store.loadError(); as error) {
       <div class="banner banner-error">{{ error }}</div>
@@ -30,7 +32,7 @@ import { WeekHeader } from './week-header';
         (next)="viewedWeekStart.set(addDays(viewedWeekStart(), 7))"
         (today)="viewedWeekStart.set(startOfWeek(store.today()))"
       />
-      <main class="board">
+      <main class="board" cdkDropListGroup>
         <div class="week">
           @for (day of days(); track day.date) {
             <app-ticket-list
@@ -40,10 +42,14 @@ import { WeekHeader } from './week-header';
               [isToday]="day.isToday"
               [isPast]="day.isPast"
               (open)="openTicket($event)"
+              (dropped)="onDrop($event)"
             />
           }
         </div>
-        <app-ticket-list class="backlog" heading="Backlog" [date]="null" [tickets]="backlog()" (open)="openTicket($event)" />
+        <app-ticket-list class="backlog" heading="Backlog" [date]="null" [tickets]="backlog()"
+          (open)="openTicket($event)"
+          (dropped)="onDrop($event)"
+        />
       </main>
       @if (openedTicket(); as ticket) {
         <app-focus-view [ticket]="ticket" (closed)="openTicketId.set(null)" />
@@ -97,5 +103,16 @@ export class App {
 
   protected openTicket(id: string): void {
     this.openTicketId.set(id);
+  }
+
+  /** CDK's currentIndex is the final index in the target list, which is exactly moveTicket's toIndex. */
+  protected onDrop(e: CdkDragDrop<string | null>): void {
+    const to = e.container.data;
+    // Released outside any list that accepts it (e.g. over a past day): cancel, keep the old place.
+    if (!e.isPointerOverContainer) return;
+    if (!canDropInto(to, this.store.today())) return;
+    if (e.container === e.previousContainer && e.currentIndex === e.previousIndex) return;
+    const id = e.item.data as string;
+    void this.store.change((t) => moveTicket(t, id, to, e.currentIndex, new Date().toISOString()));
   }
 }
