@@ -54,3 +54,19 @@ test('save creates the directory if needed', async () => {
   await createStore(path.join(dir, 'nested')).save(data());
   expect(await fs.readdir(path.join(dir, 'nested'))).toEqual(['tasks.json']);
 });
+
+test('whenIdle resolves only after queued saves have reached the disk', async () => {
+  const s = createStore(dir);
+  void s.save(data('pending'));
+  await s.whenIdle();
+  const text = await fs.readFile(path.join(dir, 'tasks.json'), 'utf8');
+  expect(JSON.parse(text).tickets[0].id).toBe('pending');
+});
+
+test('whenIdle resolves even if the last save failed', async () => {
+  const s = createStore(dir);
+  const bad = { version: 1, tickets: [] } as unknown as DataFile;
+  (bad as unknown as { self: unknown }).self = bad;
+  s.save(bad).catch(() => undefined);
+  await expect(s.whenIdle()).resolves.toBeUndefined();
+});

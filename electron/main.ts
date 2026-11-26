@@ -3,7 +3,7 @@ import * as path from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { IPC } from '../src/shared/api';
 import type { DataFile } from '../src/shared/types';
-import { createStore } from './storage';
+import { createStore, type Store } from './storage';
 
 const DEV_URL = 'http://localhost:4200';
 const FLUSH_TIMEOUT_MS = 2000;
@@ -33,13 +33,13 @@ function start(): void {
   ipcMain.handle(IPC.load, () => store.load());
   ipcMain.handle(IPC.save, (_e, data: DataFile) => store.save(data));
 
-  mainWindow = createWindow();
+  mainWindow = createWindow(store);
   app.on('activate', () => {
-    if (BrowserWindow.getAllWindows().length === 0) mainWindow = createWindow();
+    if (BrowserWindow.getAllWindows().length === 0) mainWindow = createWindow(store);
   });
 }
 
-function createWindow(): BrowserWindow {
+function createWindow(store: Store): BrowserWindow {
   const win = new BrowserWindow({
     width: 1400,
     height: 800,
@@ -62,15 +62,18 @@ function createWindow(): BrowserWindow {
     if (!url.startsWith(ownUrl)) event.preventDefault();
   });
 
-  handleCloseFlush(win);
+  handleCloseFlush(win, store);
 
   if (isDev) void win.loadURL(DEV_URL);
   else void win.loadFile(indexFile);
   return win;
 }
 
-/** Before closing, give the UI a chance to save pending edits (bounded by a timeout). */
-function handleCloseFlush(win: BrowserWindow): void {
+/**
+ * Before closing, let the UI save pending edits and wait until every queued save
+ * has reached the disk (the whole sequence is bounded by a timeout).
+ */
+function handleCloseFlush(win: BrowserWindow, store: Store): void {
   let flushed = false;
   let flushing = false;
 
@@ -88,7 +91,7 @@ function handleCloseFlush(win: BrowserWindow): void {
       win.close();
     };
     const onDone = (e: IpcMainEvent): void => {
-      if (e.sender === win.webContents) finish();
+      if (e.sender === win.webContents) void store.whenIdle().then(finish);
     };
     const timer = setTimeout(finish, FLUSH_TIMEOUT_MS);
     ipcMain.on(IPC.flushDone, onDone);
