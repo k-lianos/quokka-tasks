@@ -1,6 +1,6 @@
 import { CdkDragDrop, CdkDropListGroup } from '@angular/cdk/drag-drop';
 import { Component, computed, effect, inject, signal, untracked, viewChild } from '@angular/core';
-import { addDays, formatDayHeader, formatWeekLabel, nextViewedWeek, startOfWeek, weekDates } from '../domain/dates';
+import { addDays, formatDayHeader, formatWeekHeading, nextViewedWeek, startOfWeek, weekDates } from '../domain/dates';
 import { canDropInto } from '../domain/drop';
 import { listOf, moveTicket } from '../domain/tickets';
 import { FocusView } from './focus-view';
@@ -27,7 +27,7 @@ import { WeekHeader } from './week-header';
         <div class="banner banner-error">Couldn't save — your latest changes are not on disk</div>
       }
       <app-week-header
-        [label]="weekLabel()"
+        [heading]="weekHeading()"
         (prev)="viewedWeekStart.set(addDays(viewedWeekStart(), -7))"
         (next)="viewedWeekStart.set(addDays(viewedWeekStart(), 7))"
         (today)="viewedWeekStart.set(startOfWeek(store.today()))"
@@ -65,7 +65,7 @@ export class App {
   protected readonly viewedWeekStart = signal(startOfWeek(this.store.today()));
   protected readonly openTicketId = signal<string | null>(null);
 
-  protected readonly weekLabel = computed(() => formatWeekLabel(this.viewedWeekStart()));
+  protected readonly weekHeading = computed(() => formatWeekHeading(this.viewedWeekStart()));
   protected readonly days = computed(() => {
     const today = this.store.today();
     const tickets = this.store.tickets();
