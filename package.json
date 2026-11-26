@@ -1,0 +1,41 @@
+{
+  "name": "quokka-tasks",
+  "version": "0.1.0",
+  "scripts": {
+    "ng": "ng",
+    "serve": "ng serve",
+    "build:renderer": "ng build",
+    "build:electron": "tsc -p tsconfig.electron.json",
+    "build": "npm run build:renderer && npm run build:electron",
+    "start": "npm run build && electron .",
+    "dev": "npm run build:electron && electron . --dev",
+    "test": "vitest run",
+    "make": "npm run build && electron-forge make"
+  },
+  "private": true,
+  "packageManager": "npm@10.9.9",
+  "devDependencies": {
+    "@angular/build": "^22.3.0",
+    "@angular/cdk": "^22.3.0",
+    "@angular/cli": "^22.3.0",
+    "@angular/common": "^22.3.0",
+    "@angular/compiler": "^22.3.0",
+    "@angular/compiler-cli": "^22.3.0",
+    "@angular/core": "^22.3.0",
+    "@angular/forms": "^22.3.0",
+    "@angular/platform-browser": "^22.3.0",
+    "@electron-forge/cli": "^8.0.1",
+    "@electron-forge/maker-deb": "^8.0.1",
+    "@electron-forge/maker-zip": "^8.0.1",
+    "@types/node": "^22.20.7",
+    "electron": "^45.5.0",
+    "rxjs": "~7.8.0",
+    "tslib": "^2.3.0",
+    "typescript": "~6.0.2",
+    "vitest": "^5.1.2"
+  },
+  "productName": "Quokka Tasks",
+  "description": "Personal offline weekly tasks app",
+  "author": "Konstantinos Lianos",
+  "main": "dist/electron/electron/main.js"
+}
