@@ -13,6 +13,7 @@ Stack: Electron (main process in `electron/`, compiled with `tsc`), Angular 22 U
 - `npm run build` — build the UI (`ng build` → `dist/renderer`) and the main process (`tsc` → `dist/electron`).
 - `npm start` — build everything and run the app.
 - `npm run serve` + `npm run dev` (two terminals) — run against the Angular dev server with live reload.
+- `start` and `dev` pass `--no-sandbox` on purpose: Ubuntu's AppArmor blocks the Chromium sandbox for the Electron binary in `node_modules` (see README). Don't remove it. Only the packaged `.deb` runs sandboxed, so check sandbox-sensitive changes there.
 - `npm test` — Vitest unit tests (`src/domain/**/*.test.ts`, `electron/**/*.test.ts`).
 - `npm run make` — build and package (`.deb` + zip in `out/make/`).
 - Standard verification: `npm test && npm run build`. There is no linter yet; strict TypeScript and Angular strict templates are the static check.

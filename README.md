@@ -23,6 +23,27 @@ npm run dev        # Electron window pointed at the dev server
 Don't open `http://localhost:4200` in a normal browser: the UI needs the Electron window to
 read and save its data.
 
+### Why dev runs use `--no-sandbox`
+
+`npm start` and `npm run dev` launch Electron with `--no-sandbox`. On Ubuntu 24.04 and later,
+AppArmor blocks Chromium's sandbox for the Electron binary in `node_modules`, and Electron
+aborts with `FATAL:setuid_sandbox_host.cc ... chrome-sandbox is owned by root and has mode 4755`
+([electron#42510](https://github.com/electron/electron/issues/42510)). Dev runs load only this
+app's own code, and the window blocks navigation and new windows, so the risk is small.
+`contextIsolation` and `nodeIntegration: false` still apply.
+
+The installed `.deb` (`npm run make`) is **not** affected and runs with the full sandbox.
+Test the installed package before a release, because it is the only build that runs sandboxed.
+
+To keep the sandbox in development too, make the helper root-owned and setuid. Redo this after
+every `npm install` that reinstalls Electron:
+
+```bash
+sudo chown root:root node_modules/electron/dist/chrome-sandbox
+sudo chmod 4755 node_modules/electron/dist/chrome-sandbox
+npx electron .
+```
+
 ## Test and package
 
 ```bash
