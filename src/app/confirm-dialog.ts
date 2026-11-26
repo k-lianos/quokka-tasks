@@ -7,8 +7,8 @@ import { Component, input, output } from '@angular/core';
       <div class="dialog confirm-dialog" role="alertdialog" aria-modal="true">
         <p>{{ message() }}</p>
         <div class="dialog-actions">
-          <button type="button" class="danger" (click)="confirmed.emit()">{{ confirmLabel() }}</button>
-          <button type="button" (click)="cancelled.emit()">Cancel</button>
+          <button type="button" class="button button-danger" (click)="confirmed.emit()">{{ confirmLabel() }}</button>
+          <button type="button" class="button" (click)="cancelled.emit()">Cancel</button>
         </div>
       </div>
     </div>
