@@ -1,4 +1,4 @@
-import { app, BrowserWindow, ipcMain, type IpcMainEvent } from 'electron';
+import { app, BrowserWindow, ipcMain, type IpcMainEvent, type IpcMainInvokeEvent } from 'electron';
 import * as path from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { IPC } from '../src/shared/api';
@@ -33,6 +33,18 @@ function start(): void {
   ipcMain.handle(IPC.load, () => store.load());
   ipcMain.handle(IPC.save, (_e, data: DataFile) => store.save(data));
 
+  // Window controls for the frameless window (the UI draws its own title bar).
+  const senderWindow = (e: IpcMainEvent | IpcMainInvokeEvent): BrowserWindow | null => BrowserWindow.fromWebContents(e.sender);
+  ipcMain.on(IPC.windowMinimize, (e) => senderWindow(e)?.minimize());
+  ipcMain.on(IPC.windowToggleMaximize, (e) => {
+    const win = senderWindow(e);
+    if (!win) return;
+    if (win.isMaximized()) win.unmaximize();
+    else win.maximize();
+  });
+  ipcMain.on(IPC.windowClose, (e) => senderWindow(e)?.close()); // goes through handleCloseFlush
+  ipcMain.handle(IPC.windowIsMaximized, (e) => senderWindow(e)?.isMaximized() ?? false);
+
   mainWindow = createWindow(store);
   app.on('activate', () => {
     if (BrowserWindow.getAllWindows().length === 0) mainWindow = createWindow(store);
@@ -45,6 +57,7 @@ function createWindow(store: Store): BrowserWindow {
     height: 800,
     minWidth: 900,
     title: 'Quokka Tasks',
+    frame: false, // the UI draws its own title bar (WeekHeader + WindowControls)
     icon: path.join(app.getAppPath(), 'dist/renderer/browser/icon.png'),
     backgroundColor: '#070b12', // matches --color-bg in src/styles.css, so no white flash on launch
     webPreferences: {
@@ -65,6 +78,8 @@ function createWindow(store: Store): BrowserWindow {
   });
 
   handleCloseFlush(win, store);
+  win.on('maximize', () => win.webContents.send(IPC.windowMaximizedChange, true));
+  win.on('unmaximize', () => win.webContents.send(IPC.windowMaximizedChange, false));
 
   if (isDev) void win.loadURL(DEV_URL);
   else void win.loadFile(indexFile);
