@@ -1,8 +1,43 @@
-import { app, BrowserWindow } from 'electron';
+import { app, BrowserWindow, ipcMain, type IpcMainEvent } from 'electron';
 import * as path from 'node:path';
+import { pathToFileURL } from 'node:url';
+import { IPC } from '../src/shared/api';
+import type { DataFile } from '../src/shared/types';
+import { createStore } from './storage';
 
 const DEV_URL = 'http://localhost:4200';
+const FLUSH_TIMEOUT_MS = 2000;
 const isDev = !app.isPackaged && process.argv.includes('--dev');
+
+// Keep data in <appData>/quokka-tasks regardless of productName.
+// An explicit --user-data-dir (used for isolated test runs) wins.
+if (!app.commandLine.hasSwitch('user-data-dir')) {
+  app.setPath('userData', path.join(app.getPath('appData'), 'quokka-tasks'));
+}
+
+let mainWindow: BrowserWindow | null = null;
+
+if (!app.requestSingleInstanceLock()) {
+  app.quit();
+} else {
+  app.on('second-instance', () => {
+    if (!mainWindow) return;
+    if (mainWindow.isMinimized()) mainWindow.restore();
+    mainWindow.focus();
+  });
+  app.whenReady().then(start);
+}
+
+function start(): void {
+  const store = createStore(app.getPath('userData'));
+  ipcMain.handle(IPC.load, () => store.load());
+  ipcMain.handle(IPC.save, (_e, data: DataFile) => store.save(data));
+
+  mainWindow = createWindow();
+  app.on('activate', () => {
+    if (BrowserWindow.getAllWindows().length === 0) mainWindow = createWindow();
+  });
+}
 
 function createWindow(): BrowserWindow {
   const win = new BrowserWindow({
@@ -10,21 +45,60 @@ function createWindow(): BrowserWindow {
     height: 800,
     minWidth: 900,
     title: 'Quokka Tasks',
+    webPreferences: {
+      preload: path.join(__dirname, 'preload.js'),
+      contextIsolation: true,
+      nodeIntegration: false,
+      sandbox: true,
+    },
   });
-  if (isDev) {
-    void win.loadURL(DEV_URL);
-  } else {
-    void win.loadFile(path.join(app.getAppPath(), 'dist/renderer/browser/index.html'));
-  }
+
+  const indexFile = path.join(app.getAppPath(), 'dist/renderer/browser/index.html');
+  const ownUrl = isDev ? DEV_URL : pathToFileURL(indexFile).href;
+
+  // Offline lock-down: no new windows, no navigation away from the app.
+  win.webContents.setWindowOpenHandler(() => ({ action: 'deny' }));
+  win.webContents.on('will-navigate', (event, url) => {
+    if (!url.startsWith(ownUrl)) event.preventDefault();
+  });
+
+  handleCloseFlush(win);
+
+  if (isDev) void win.loadURL(DEV_URL);
+  else void win.loadFile(indexFile);
   return win;
 }
 
-app.whenReady().then(() => {
-  createWindow();
-  app.on('activate', () => {
-    if (BrowserWindow.getAllWindows().length === 0) createWindow();
+/** Before closing, give the UI a chance to save pending edits (bounded by a timeout). */
+function handleCloseFlush(win: BrowserWindow): void {
+  let flushed = false;
+  let flushing = false;
+
+  win.on('close', (event) => {
+    if (flushed) return;
+    event.preventDefault();
+    if (flushing) return;
+    flushing = true;
+
+    const finish = (): void => {
+      if (flushed) return;
+      flushed = true;
+      clearTimeout(timer);
+      ipcMain.removeListener(IPC.flushDone, onDone);
+      win.close();
+    };
+    const onDone = (e: IpcMainEvent): void => {
+      if (e.sender === win.webContents) finish();
+    };
+    const timer = setTimeout(finish, FLUSH_TIMEOUT_MS);
+    ipcMain.on(IPC.flushDone, onDone);
+    win.webContents.send(IPC.flushRequest);
   });
-});
+
+  win.on('closed', () => {
+    if (mainWindow === win) mainWindow = null;
+  });
+}
 
 app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') app.quit();
