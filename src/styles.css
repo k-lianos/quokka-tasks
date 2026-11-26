@@ -85,13 +85,39 @@ button { cursor: pointer; }
   display: flex;
   justify-content: space-between;
   align-items: center;
-  gap: 8px;
-  padding: 6px 10px;
-  background: #fff8d6;
-  border: 1px solid #e6d77a;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-md);
+  border-left: 4px solid var(--color-warning);
+  background: var(--color-surface-raised);
 }
-.banner-error { background: #fde2e1; border-color: #e5a3a0; }
-.banner button { border: none; background: none; }
+.banner-error { border-left-color: var(--color-danger); }
+
+/* Buttons */
+.button {
+  padding: var(--space-2) var(--space-4);
+  border: none;
+  border-radius: var(--radius-sm);
+  background: var(--color-surface-raised);
+  font-weight: 600;
+  transition: background var(--transition-fast);
+}
+.button:hover { background: color-mix(in srgb, var(--color-surface-raised), white 6%); }
+.button-danger { color: var(--color-danger); background: color-mix(in srgb, var(--color-danger) 15%, transparent); }
+.button-danger:hover { background: color-mix(in srgb, var(--color-danger) 25%, transparent); }
+.icon-button {
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  padding: 0;
+  border: none;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--color-text-muted);
+  transition: background var(--transition-fast), color var(--transition-fast);
+}
+.icon-button:hover { background: var(--color-accent-tint); color: var(--color-text); }
 
 /* Week header: brand lockup | eyebrow + big range | ‹ Today › pill */
 .week-header { display: flex; align-items: center; gap: var(--space-5); padding: var(--space-1) var(--space-1) 0; }
@@ -237,37 +263,51 @@ app-ticket-list { display: block; min-height: 0; }
 .dialog-backdrop {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.35);
+  background: var(--color-backdrop);
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 10;
 }
 .dialog {
-  background: #fff;
-  border-radius: 6px;
-  padding: 16px;
-  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.25);
+  padding: var(--space-5);
+  border-radius: var(--radius-xl);
+  background: var(--color-surface);
+  box-shadow: inset 0 0 0 1px var(--color-border), var(--shadow-lift);
 }
-.dialog-actions { display: flex; justify-content: flex-end; gap: 8px; }
-.danger { color: #b3261e; }
+.dialog-actions { display: flex; justify-content: flex-end; gap: var(--space-2); }
 
 .focus-view {
   width: min(640px, 90vw);
   height: min(560px, 85vh);
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: var(--space-3);
 }
-.focus-header { display: flex; justify-content: space-between; align-items: center; color: #666; }
-.focus-close { border: none; background: none; font-size: 16px; }
-.field { display: flex; flex-direction: column; gap: 4px; font-weight: 600; }
-.field input, .field select, .field textarea { font: inherit; font-weight: normal; padding: 4px 6px; }
+.focus-header { display: flex; justify-content: space-between; align-items: center; color: var(--color-text-muted); }
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  font-size: var(--font-size-small);
+  font-weight: var(--font-weight-heavy);
+  color: var(--color-text-muted);
+}
+.field input, .field select, .field textarea, .add-input {
+  padding: var(--space-2) var(--space-3);
+  border: none;
+  border-radius: var(--radius-sm);
+  background: var(--color-surface-raised);
+  color: var(--color-text);
+  font-size: var(--font-size-body);
+  font-weight: normal;
+}
 .field-grow { flex: 1; min-height: 0; }
 .field-grow textarea { flex: 1; resize: none; }
-.field-error { margin: -6px 0 0; color: #b3261e; font-size: 12px; }
+.field-error { margin: calc(-1 * var(--space-1)) 0 0; font-size: var(--font-size-small); color: var(--color-danger); }
 
 .confirm-dialog { width: min(360px, 90vw); }
+.confirm-dialog p { margin: 0 0 var(--space-4); }
 app-confirm-dialog .dialog-backdrop { z-index: 20; }
 
 /* Drag and drop (Angular CDK) */
