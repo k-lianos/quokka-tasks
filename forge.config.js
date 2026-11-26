@@ -12,7 +12,7 @@ module.exports = {
     { name: '@electron-forge/maker-zip', platforms: ['linux'] },
     {
       name: '@electron-forge/maker-deb',
-      config: { options: { name: 'quokka-tasks', productName: 'Quokka Tasks', categories: ['Office'] } },
+      config: { options: { name: 'quokka-tasks', productName: 'Quokka Tasks', categories: ['Office'], icon: 'public/icon.png' } },
     },
   ],
 };
