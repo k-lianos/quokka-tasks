@@ -2,8 +2,10 @@ import { describe, expect, test } from 'vitest';
 import {
   addDays,
   formatDayHeader,
+  formatDayHeading,
   formatLongDate,
   formatWeekHeading,
+  isValidDate,
   isoWeekNumber,
   nextViewedWeek,
   startOfWeek,
@@ -64,5 +66,20 @@ describe('nextViewedWeek', () => {
     expect(nextViewedWeek('2026-11-23', '2026-11-29', '2026-11-30')).toBe('2026-11-30');
     expect(nextViewedWeek('2026-11-09', '2026-11-29', '2026-11-30')).toBe('2026-11-09');
     expect(nextViewedWeek('2026-11-23', '2026-11-25', '2026-11-26')).toBe('2026-11-23');
+  });
+});
+
+describe('day view dates', () => {
+  test('isValidDate accepts real dates only', () => {
+    expect(isValidDate('2026-11-26')).toBe(true);
+    expect(isValidDate('2028-02-29')).toBe(true);
+    expect(isValidDate('2026-02-30')).toBe(false);
+    expect(isValidDate('2026-1-5')).toBe(false);
+    expect(isValidDate('garbage')).toBe(false);
+  });
+
+  test('formatDayHeading', () => {
+    expect(formatDayHeading('2026-11-26', '2026-11-26')).toEqual({ eyebrow: 'Thursday · Week 48', title: '26 November' });
+    expect(formatDayHeading('2027-01-04', '2026-11-26')).toEqual({ eyebrow: 'Monday · Week 1', title: '4 January 2027' });
   });
 });

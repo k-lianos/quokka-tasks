@@ -105,6 +105,8 @@ button { cursor: pointer; }
   transition: background var(--transition-fast);
 }
 .button:hover { background: color-mix(in srgb, var(--color-surface-raised), white 6%); }
+.button-primary { background: var(--color-accent); color: var(--color-on-accent); }
+.button-primary:hover { background: color-mix(in srgb, var(--color-accent), white 15%); }
 .button-danger { color: var(--color-danger); background: color-mix(in srgb, var(--color-danger) 15%, transparent); }
 .button-danger:hover { background: color-mix(in srgb, var(--color-danger) 25%, transparent); }
 .icon-button {
@@ -121,24 +123,24 @@ button { cursor: pointer; }
 }
 .icon-button:hover { background: var(--color-accent-tint); color: var(--color-text); }
 
-/* Week header: [brand lockup | eyebrow + big range]  ‹ Today › pill (centred)  window controls.
-   Equal outer columns keep the pill centred on the window. The left one never shrinks below
-   its content, so on narrow windows the pill moves right instead of the date being cut off. */
-.week-header {
+/* App header: [brand lockup | eyebrow + big heading | day progress]  ‹ Today › + Day|Week (centred)  window controls.
+   Equal outer columns keep the navigation centred on the window. The left one never shrinks below
+   its content, so on narrow windows the navigation moves right instead of the heading being cut off. */
+.app-header {
   display: grid;
   grid-template-columns: minmax(max-content, 1fr) auto minmax(0, 1fr);
   align-items: center;
   gap: var(--space-5);
   padding: var(--space-1) var(--space-1) 0;
 }
-.week-header-lead { display: flex; align-items: center; gap: var(--space-5); min-width: 0; }
-.week-header app-window-controls { justify-self: end; }
+.app-header-lead { display: flex; align-items: center; gap: var(--space-5); min-width: 0; }
+.app-header app-window-controls { justify-self: end; }
 
 .brand { display: flex; align-items: center; gap: 9px; flex: none; }
 .brand-mark { width: 30px; height: 30px; color: var(--color-accent); }
 .brand-word { font-size: 22px; font-weight: var(--font-weight-heavy); letter-spacing: var(--tracking-tight); }
 
-.week-title {
+.view-title {
   display: flex;
   flex-direction: column;
   margin-right: auto;
@@ -146,14 +148,14 @@ button { cursor: pointer; }
   padding-left: var(--space-5);
   border-left: 1px solid var(--color-border);
 }
-.week-eyebrow {
+.view-eyebrow {
   font-size: 11px;
   font-weight: var(--font-weight-heavy);
   letter-spacing: var(--tracking-caps);
   text-transform: uppercase;
   color: var(--color-accent);
 }
-.week-range {
+.view-heading {
   margin: 0;
   font-size: var(--font-size-display);
   font-weight: var(--font-weight-heavy);
@@ -188,6 +190,23 @@ button { cursor: pointer; }
 .pill-button:hover { background: var(--color-accent-tint); }
 .pill-button.is-primary { background: var(--color-accent); color: var(--color-on-accent); }
 
+.app-header-nav { display: flex; align-items: center; gap: var(--space-2); }
+.segmented-button.is-active { background: var(--color-surface); color: var(--color-text); }
+.segmented-button:not(.is-active) { color: var(--color-text-muted); }
+
+/* Day progress: "2 of 5 done" with a bar */
+.progress {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  flex: none;
+  font-size: var(--font-size-small);
+  color: var(--color-text-muted);
+  white-space: nowrap;
+}
+.progress-track { width: 96px; height: 6px; border-radius: 3px; background: var(--color-surface-raised); overflow: hidden; }
+.progress-fill { height: 100%; background: var(--color-success); transition: width var(--transition-fast); }
+
 .icon { width: 16px; height: 16px; }
 
 /* Title bar: the window is frameless, so the header (or, while loading, a bare strip)
@@ -208,6 +227,9 @@ button { cursor: pointer; }
 .board { flex: 1; min-height: 0; display: flex; gap: var(--space-3); }
 .week { flex: 1; min-width: 0; display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: var(--space-3); }
 .board > .backlog { width: 240px; flex: none; }
+/* Routed pages fill the space beside the backlog. */
+app-week-page, app-day-page { flex: 1; min-width: 0; min-height: 0; }
+app-day-page { display: block; }
 
 app-ticket-list { display: block; min-height: 0; }
 
@@ -228,6 +250,8 @@ app-ticket-list { display: block; min-height: 0; }
   text-transform: uppercase;
   color: var(--color-text-muted);
 }
+.list-heading-link { color: inherit; text-decoration: none; border-radius: var(--radius-sm); transition: color var(--transition-fast); }
+.list-heading-link:hover { color: var(--color-accent); }
 .list.is-today { box-shadow: inset 0 0 0 2px var(--color-accent); }
 .list.is-today .list-heading { color: var(--color-accent); }
 /* Past days read as "spent": hollow column, quieter cards. No opacity, so text keeps AA contrast. */
@@ -378,3 +402,105 @@ app-ticket-card { display: block; }
   .list { padding: var(--space-2); }
   .card { padding: var(--space-2); column-gap: var(--space-1); }
 }
+
+/* Day page: Now, Up next / Planned, Done. One readable column that scrolls as a whole. */
+.day-page {
+  height: 100%;
+  max-width: 880px;
+  margin: 0 auto;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+  padding: var(--space-1);
+}
+.day-section { display: flex; flex-direction: column; gap: var(--space-2); }
+.day-section-heading {
+  margin: 0;
+  padding: 0 var(--space-1);
+  font-size: var(--font-size-small);
+  font-weight: var(--font-weight-heavy);
+  letter-spacing: var(--tracking-caps);
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+}
+.day-cards { display: flex; flex-direction: column; gap: var(--space-2); min-height: 44px; }
+.drop-hint {
+  margin: 0;
+  padding: var(--space-4);
+  border: 1px dashed var(--color-border);
+  border-radius: var(--radius-md);
+  text-align: center;
+  color: var(--color-text-muted);
+}
+.day-empty { margin: 0; color: var(--color-text-muted); }
+
+.now-block {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: var(--space-5);
+  border-radius: var(--radius-lg);
+  background: var(--color-accent-tint);
+  box-shadow: inset 0 0 0 1px var(--color-accent);
+}
+.now-head { display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); }
+.now-eyebrow {
+  font-size: 11px;
+  font-weight: var(--font-weight-heavy);
+  letter-spacing: var(--tracking-caps);
+  text-transform: uppercase;
+  color: var(--color-accent);
+}
+.now-title {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-3);
+  padding: 0;
+  border: none;
+  background: none;
+  text-align: left;
+  font-size: var(--font-size-display);
+  font-weight: var(--font-weight-heavy);
+  letter-spacing: var(--tracking-tight);
+  line-height: 1.15;
+  transition: color var(--transition-fast);
+}
+.now-title:hover { color: var(--color-accent); }
+.now-priority { font-size: var(--font-size-body); color: var(--color-text-muted); }
+.now-description { margin: 0; max-height: 40vh; overflow-y: auto; white-space: pre-wrap; line-height: 1.5; }
+.now-actions { display: flex; flex-wrap: wrap; gap: var(--space-2); }
+.now-empty { margin: 0; font-weight: 600; color: var(--color-text-muted); }
+
+app-day-row { display: block; }
+.day-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-md);
+  background: var(--color-surface-raised);
+  transition: background var(--transition-fast);
+}
+.day-row:hover { background: color-mix(in srgb, var(--color-surface-raised), white 6%); }
+.day-row-main {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-2);
+  padding: 0;
+  border: none;
+  background: none;
+  text-align: left;
+}
+.day-row-text { display: flex; flex-direction: column; min-width: 0; }
+.day-row-title, .day-row-desc { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.day-row-desc { font-size: var(--font-size-small); color: var(--color-text-muted); }
+.day-row .card-status { flex: none; }
+.day-row-start { flex: none; padding: var(--space-1) var(--space-3); background: var(--color-surface); }
+.day-row-start:hover { background: var(--color-accent-tint); }
+app-day-row.is-locked .day-row { background: transparent; box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--color-text-muted), transparent 50%); }
+app-day-row.is-locked .day-row:hover { background: var(--color-surface-raised); }
+app-day-row.is-locked .day-row-title { color: var(--color-text-muted); text-decoration: line-through; }
+.cdk-drag-preview .day-row { box-shadow: var(--shadow-lift); }
