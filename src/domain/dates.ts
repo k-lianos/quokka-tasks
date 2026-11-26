@@ -2,7 +2,11 @@
 // which would shift the day for anyone east or west of UTC.
 
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-const WEEKDAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+const MONTHS_LONG = [
+  'January', 'February', 'March', 'April', 'May', 'June',
+  'July', 'August', 'September', 'October', 'November', 'December',
+];
+const WEEKDAYS =['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
 const pad = (n: number): string => String(n).padStart(2, '0');
 
@@ -56,6 +60,29 @@ export function formatWeekLabel(weekStart: string): string {
     range = `${start.getDate()}–${endText}`;
   }
   return `${week} · ${range}`;
+}
+
+export interface WeekHeading {
+  /** e.g. 'Week 48 · 2026' — the year is the ISO-week year (year of its Thursday). */
+  eyebrow: string;
+  /** e.g. '23 – 29 November', '30 November – 6 December', '28 December 2026 – 3 January 2027'. */
+  range: string;
+}
+
+export function formatWeekHeading(weekStart: string): WeekHeading {
+  const start = parse(weekStart);
+  const end = parse(addDays(weekStart, 6));
+  const isoYear = parse(addDays(weekStart, 3)).getFullYear();
+  const day = (d: Date): string => `${d.getDate()} ${MONTHS_LONG[d.getMonth()]}`;
+  let range: string;
+  if (start.getFullYear() !== end.getFullYear()) {
+    range = `${day(start)} ${start.getFullYear()} – ${day(end)} ${end.getFullYear()}`;
+  } else if (start.getMonth() !== end.getMonth()) {
+    range = `${day(start)} – ${day(end)}`;
+  } else {
+    range = `${start.getDate()} – ${day(end)}`;
+  }
+  return { eyebrow: `Week ${isoWeekNumber(weekStart)} · ${isoYear}`, range };
 }
 
 export function formatDayHeader(date: string): string {

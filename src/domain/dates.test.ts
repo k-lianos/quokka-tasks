@@ -3,6 +3,7 @@ import {
   addDays,
   formatDayHeader,
   formatLongDate,
+  formatWeekHeading,
   formatWeekLabel,
   isoWeekNumber,
   nextViewedWeek,
@@ -49,6 +50,14 @@ describe('labels', () => {
     expect(formatWeekLabel('2026-11-23')).toBe('Week 48 · 23–29 Nov 2026');
     expect(formatWeekLabel('2026-11-30')).toBe('Week 49 · 30 Nov – 6 Dec 2026');
     expect(formatWeekLabel('2026-12-28')).toBe('Week 53 · 28 Dec 2026 – 3 Jan 2027');
+  });
+
+  test('formatWeekHeading splits week number/year from the date range', () => {
+    expect(formatWeekHeading('2026-11-23')).toEqual({ eyebrow: 'Week 48 · 2026', range: '23 – 29 November' });
+    expect(formatWeekHeading('2026-11-30')).toEqual({ eyebrow: 'Week 49 · 2026', range: '30 November – 6 December' });
+    expect(formatWeekHeading('2026-12-28')).toEqual({ eyebrow: 'Week 53 · 2026', range: '28 December 2026 – 3 January 2027' });
+    // ISO week 1 of 2026 starts in December 2025: the eyebrow uses the ISO-week year.
+    expect(formatWeekHeading('2025-12-29')).toEqual({ eyebrow: 'Week 1 · 2026', range: '29 December 2025 – 4 January 2026' });
   });
 
   test('day header and long date', () => {
