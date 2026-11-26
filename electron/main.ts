@@ -45,6 +45,7 @@ function createWindow(store: Store): BrowserWindow {
     height: 800,
     minWidth: 900,
     title: 'Quokka Tasks',
+    backgroundColor: '#070b12', // matches --color-bg in src/styles.css, so no white flash on launch
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
       contextIsolation: true,
