@@ -121,8 +121,18 @@ button { cursor: pointer; }
 }
 .icon-button:hover { background: var(--color-accent-tint); color: var(--color-text); }
 
-/* Week header: brand lockup | eyebrow + big range | ‹ Today › pill */
-.week-header { display: flex; align-items: center; gap: var(--space-5); padding: var(--space-1) var(--space-1) 0; }
+/* Week header: [brand lockup | eyebrow + big range]  ‹ Today › pill (centred)  window controls.
+   Equal outer columns keep the pill centred on the window. The left one never shrinks below
+   its content, so on narrow windows the pill moves right instead of the date being cut off. */
+.week-header {
+  display: grid;
+  grid-template-columns: minmax(max-content, 1fr) auto minmax(0, 1fr);
+  align-items: center;
+  gap: var(--space-5);
+  padding: var(--space-1) var(--space-1) 0;
+}
+.week-header-lead { display: flex; align-items: center; gap: var(--space-5); min-width: 0; }
+.week-header app-window-controls { justify-self: end; }
 
 .brand { display: flex; align-items: center; gap: 9px; flex: none; }
 .brand-mark { width: 30px; height: 30px; color: var(--color-accent); }

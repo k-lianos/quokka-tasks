@@ -86,7 +86,7 @@ Checked contrast (AA): muted on surface 6.3, muted on raised 5.8, danger on surf
 
 | Component | Classes | Notes |
 |---|---|---|
-| Header | `.week-header`, `.brand`, `.brand-mark`, `.brand-word`, `.week-title`, `.week-eyebrow`, `.week-range` | No bar. Lockup, divider, two-line week, pill on the right. |
+| Header | `.week-header`, `.week-header-lead`, `.brand`, `.brand-mark`, `.brand-word`, `.week-title`, `.week-eyebrow`, `.week-range` | No bar. Lockup, divider and two-line week on the left; pill centred on the window; window controls on the right. |
 | Title bar | `.title-bar`, `.title-strip` | The window is frameless: the header is the drag handle (`-webkit-app-region: drag`, buttons `no-drag`) and bleeds to the window's top edge. While loading or on a load error, a bare `.title-strip` holds just the window controls. Banners go below it. |
 | Window controls | `.window-controls`, `.window-control`, `.window-control-close` | Minimise, maximise/restore, close as `.icon-button`s at the right of the title bar. Close hover = red text on 15% red. |
 | Segmented pill | `.pill`, `.pill-button`, `.pill-button.is-primary` | Raised-surface track; one primary (cyan) button max. |
