@@ -23,11 +23,12 @@ Origin: a brand mood board (navy, cyan, royal-blue glass, rounded tiles, chunky 
 2. **Use tokens only.** Rules reference `var(--…)`. A raw colour value belongs in the `:root` block and nowhere else. Need a new colour? Add a token, document it here.
 3. **Cyan is precious.** Use `--color-accent` only for: the brand mark, today, the primary action in a group (one per group), focus rings, the "in progress" status, and drag targets. Not for large backgrounds, body text, or decoration.
 4. **Contrast: WCAG AA.** Text ≥ 4.5:1 against what it sits on (≥ 3:1 for large text and UI shapes). Check muted text especially; on the glass panel use `--color-glass-text-muted`.
-5. **Focus is always visible.** Interactive elements get the global `:focus-visible` ring (`--focus-ring`). Don't remove it; if you override `box-shadow` on a focusable element, re-add the ring for `:focus-visible`.
+5. **Focus is always visible.** Interactive elements get the global `:focus-visible` ring (`--focus-ring`). Don't remove it; if you override `box-shadow` on a focusable element, re-add the ring for `:focus-visible`. Inside a scroll container (like `.cards`) the outer ring gets clipped, so use an inset ring there (`.card:focus-visible`).
 6. **Icons are inline SVG** with `stroke`/`fill="currentColor"`, `aria-hidden="true"`, class `icon` (16px), and the button carries the `aria-label`. No icon fonts, no emoji/unicode glyphs as icons.
-7. **Nothing remote.** Fonts and images are bundled (CSP is `default-src 'self'`).
-8. **Shape and space from the scales** below; don't invent in-between values.
-9. **Check 900px.** The window's minimum width is 900px; there is a compact media query at the end of `styles.css` (≤ 1200px). New layouts must not overflow there.
+7. **Dark native controls.** `:root` sets `color-scheme: dark`, so selects, scrollbars and other native controls render dark. Keep it.
+8. **Nothing remote.** Fonts and images are bundled (CSP is `default-src 'self'`).
+9. **Shape and space from the scales** below; don't invent in-between values.
+10. **Check 900px.** The window's minimum width is 900px; there is a compact media query at the end of `styles.css` (≤ 1200px). New layouts must not overflow there.
 
 ## Tokens
 
@@ -76,9 +77,10 @@ Checked contrast (AA): muted on surface 6.3, muted on raised 5.8, danger on surf
 | Display (week range) | 26px / 800 / tight |
 | Brand word | 22px / 800 / tight |
 | Eyebrow (week number) | 11px / 800 / caps / cyan |
-| Column heading, field label | 12px / 800 / caps (headings) · muted |
+| Column heading | 12px / 800 / caps / muted |
+| Field label | 12px / 800 / muted (not uppercase) |
 | Body, card title, inputs | 14px / 400 |
-| Meta (status, priority) | 12px / muted |
+| Meta (status) | 12px / muted · priority number 12px / 800 / muted |
 
 ## Components
 
@@ -86,7 +88,7 @@ Checked contrast (AA): muted on surface 6.3, muted on raised 5.8, danger on surf
 |---|---|---|
 | Header | `.week-header`, `.brand`, `.brand-mark`, `.brand-word`, `.week-title`, `.week-eyebrow`, `.week-range` | No bar. Lockup, divider, two-line week, pill on the right. |
 | Segmented pill | `.pill`, `.pill-button`, `.pill-button.is-primary` | Raised-surface track; one primary (cyan) button max. |
-| Day column | `.list`, `.list-heading`, `.list.is-today`, `.list.is-past` | Surface panel. Today = 2px inset cyan outline + cyan heading. Past = 50% opacity. |
+| Day column | `.list`, `.list-heading`, `.list.is-today`, `.list.is-past` | Surface panel. Today = 2px inset cyan outline + cyan heading. Past = hollow (transparent with a 1px border), cards on `--color-surface`, titles muted. Never dim with `opacity`: it breaks AA contrast. |
 | Backlog (glass) | `.backlog .list` | Royal-blue gradient + blue inner edge; cards translucent white; muted text uses `--color-glass-text-muted`. |
 | Card | `.card`, `.card-priority`, `.card-title`, `.card-status`, `.status-dot` | Raised surface, one-line title with ellipsis. Dot: muted = to do, cyan = in progress, green = done. |
 | Add | `.add-button`, `.add-input` | Quiet muted text, cyan on hover; input styled like fields. |
