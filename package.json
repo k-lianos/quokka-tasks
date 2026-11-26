@@ -7,8 +7,8 @@
     "build:renderer": "ng build",
     "build:electron": "tsc -p tsconfig.electron.json",
     "build": "npm run build:renderer && npm run build:electron",
-    "start": "npm run build && electron .",
-    "dev": "npm run build:electron && electron . --dev",
+    "start": "npm run build && electron . --no-sandbox",
+    "dev": "npm run build:electron && electron . --dev --no-sandbox",
     "test": "vitest run",
     "make": "npm run build && electron-forge make"
   },
