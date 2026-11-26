@@ -118,3 +118,13 @@ test('rollover into a day with completed tickets keeps the pile at the bottom', 
   const r = sinkCompleted(rollover(list, D, NOW));
   expect(ids(listOf(r, D))).toEqual(['late', 'd1']);
 });
+
+test('sinkCompleted leaves its input untouched and renumbers duplicate or gapped positions', () => {
+  const input = [done('d1', 0), open('o1', 0), open('o2', 5), makeTicket({ id: 'x', date: null, position: 3 })];
+  const snapshot = structuredClone(input);
+  const r = sinkCompleted(input);
+  expect(input).toEqual(snapshot);
+  expect(listOf(r, D).map((t) => [t.id, t.position])).toEqual([['o1', 0], ['o2', 1], ['d1', 2]]);
+  expect(listOf(r, null).map((t) => [t.id, t.position])).toEqual([['x', 0]]);
+  expect(r.every((t, i) => t.updatedAt === input[i].updatedAt)).toBe(true);
+});

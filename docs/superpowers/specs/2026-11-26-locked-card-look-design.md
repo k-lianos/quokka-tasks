@@ -11,7 +11,7 @@ A completed card looked exactly like one you can drag; only the status label dif
 ## Decided
 
 - **Look (the user picked B + C):** completed cards (`.is-locked`) are flat: transparent background, 1px border, muted title with a strike-through. On hover the background fills in slightly, since the card still opens on click. Keyboard focus keeps the 2px cyan ring.
-  - Days: border `--color-border`, hover `--color-surface`, title `--color-text-muted`.
+  - Days: border `--color-border`, hover `--color-surface-raised` (`--color-surface` would match the column background), title `--color-text-muted`.
   - Backlog: a **stronger** border than `--color-glass-border` (the user asked for this after the preview): `--color-glass-text-muted` mixed to half strength; hover `--color-glass-card`; title `--color-glass-text-muted`.
   - The status label ("Completed") and the priority number stay.
 - **Sort:** `sinkCompleted` groups the tickets by list in one pass (like `renumberAll`). Behaviour unchanged; the existing tests are the guard.
