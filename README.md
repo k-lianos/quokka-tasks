@@ -2,7 +2,8 @@
 
 A personal, offline desktop tasks app: a Monday–Sunday week view plus a backlog of tickets
 (title, description, status). Drag tickets to plan and prioritise them. Unfinished tickets from
-past days move to today automatically.
+past days move to today automatically. Completed tickets stay on their day, sink to the bottom,
+and are locked until you change their status.
 
 Built with Electron and Angular. No internet connection is needed or used.
 

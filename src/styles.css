@@ -1,49 +1,188 @@
-/* All app styles live here, so restyling later happens in one place. Deliberately plain for v1. */
+/* All app styles live here. The look is documented in docs/style-guide.md.
+   Rules use the tokens below only; raw colour values belong in :root. */
+
+@import '@fontsource-variable/plus-jakarta-sans';
+
+:root {
+  /* Colour */
+  --color-bg: #070b12; /* keep in sync with backgroundColor in electron/main.ts */
+  --color-surface: #0d131d;
+  --color-surface-raised: #131b28;
+  --color-border: #1c2636;
+  --color-accent: #00e1f0;
+  --color-on-accent: #04121a;
+  --color-accent-tint: rgb(0 225 240 / 0.08);
+  --color-glass-from: #0f2a8a;
+  --color-glass-to: #0a1a55;
+  --color-glass-border: #2d5cff66;
+  --color-glass-card: rgb(255 255 255 / 0.07);
+  --color-glass-text-muted: #b4c0d6; /* muted text on the glass panel; --color-text-muted fails AA there */
+  --color-text: #f2f6fa;
+  --color-text-muted: #8a97a8;
+  --color-success: #3ddc97;
+  --color-danger: #ff6b6b;
+  --color-warning: #ffc857;
+  --color-backdrop: rgb(2 5 10 / 0.7);
+
+  /* Shape */
+  --radius-sm: 9px;
+  --radius-md: 11px;
+  --radius-pill-outer: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 22px;
+
+  /* Spacing */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+
+  /* Type */
+  --font-sans: 'Plus Jakarta Sans Variable', system-ui, sans-serif;
+  --font-size-body: 14px;
+  --font-size-small: 12px;
+  --font-size-display: 26px;
+  --font-weight-heavy: 800;
+  --tracking-tight: -0.03em;
+  --tracking-caps: 0.08em;
+
+  /* Effects */
+  --shadow-lift: 0 12px 32px rgb(0 0 0 / 0.5);
+  --focus-ring: 0 0 0 2px var(--color-bg), 0 0 0 4px var(--color-accent);
+  --transition-fast: 120ms ease;
+
+  color-scheme: dark;
+}
 
 *, *::before, *::after { box-sizing: border-box; }
 
 html, body { height: 100%; margin: 0; }
 
 body {
-  font-family: system-ui, sans-serif;
-  font-size: 14px;
-  color: #222;
-  background: #f4f4f4;
+  font-family: var(--font-sans);
+  font-size: var(--font-size-body);
+  color: var(--color-text);
+  background: var(--color-bg);
 }
 
 app-root {
   display: flex;
   flex-direction: column;
   height: 100%;
-  padding: 8px;
-  gap: 8px;
+  padding: var(--space-4);
+  gap: var(--space-3);
 }
 
-button { font: inherit; cursor: pointer; }
+button, input, select, textarea { font: inherit; color: inherit; }
+button { cursor: pointer; }
 
-.loading { margin: 16px; color: #666; }
+:focus-visible { outline: none; box-shadow: var(--focus-ring); }
+
+.loading { margin: var(--space-4); color: var(--color-text-muted); }
 
 /* Banners */
 .banner {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  gap: 8px;
-  padding: 6px 10px;
-  background: #fff8d6;
-  border: 1px solid #e6d77a;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-md);
+  border-left: 4px solid var(--color-warning);
+  background: var(--color-surface-raised);
 }
-.banner-error { background: #fde2e1; border-color: #e5a3a0; }
-.banner button { border: none; background: none; }
+.banner-error { border-left-color: var(--color-danger); }
 
-/* Week header */
-.week-header { display: flex; align-items: center; gap: 8px; }
-.week-label { font-size: 16px; margin: 0 8px; min-width: 260px; text-align: center; }
+/* Buttons */
+.button {
+  padding: var(--space-2) var(--space-4);
+  border: none;
+  border-radius: var(--radius-sm);
+  background: var(--color-surface-raised);
+  font-weight: 600;
+  transition: background var(--transition-fast);
+}
+.button:hover { background: color-mix(in srgb, var(--color-surface-raised), white 6%); }
+.button-danger { color: var(--color-danger); background: color-mix(in srgb, var(--color-danger) 15%, transparent); }
+.button-danger:hover { background: color-mix(in srgb, var(--color-danger) 25%, transparent); }
+.icon-button {
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  padding: 0;
+  border: none;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--color-text-muted);
+  transition: background var(--transition-fast), color var(--transition-fast);
+}
+.icon-button:hover { background: var(--color-accent-tint); color: var(--color-text); }
+
+/* Week header: brand lockup | eyebrow + big range | ‹ Today › pill */
+.week-header { display: flex; align-items: center; gap: var(--space-5); padding: var(--space-1) var(--space-1) 0; }
+
+.brand { display: flex; align-items: center; gap: 9px; flex: none; }
+.brand-mark { width: 30px; height: 30px; color: var(--color-accent); }
+.brand-word { font-size: 22px; font-weight: var(--font-weight-heavy); letter-spacing: var(--tracking-tight); }
+
+.week-title {
+  display: flex;
+  flex-direction: column;
+  margin-right: auto;
+  min-width: 0;
+  padding-left: var(--space-5);
+  border-left: 1px solid var(--color-border);
+}
+.week-eyebrow {
+  font-size: 11px;
+  font-weight: var(--font-weight-heavy);
+  letter-spacing: var(--tracking-caps);
+  text-transform: uppercase;
+  color: var(--color-accent);
+}
+.week-range {
+  margin: 0;
+  font-size: var(--font-size-display);
+  font-weight: var(--font-weight-heavy);
+  letter-spacing: var(--tracking-tight);
+  line-height: 1.1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.pill {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  flex: none;
+  padding: 3px;
+  border-radius: var(--radius-pill-outer);
+  background: var(--color-surface-raised);
+}
+.pill-button {
+  display: grid;
+  place-items: center;
+  height: 30px;
+  min-width: 32px;
+  padding: 0 var(--space-3);
+  border: none;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  font-weight: 600;
+  transition: background var(--transition-fast);
+}
+.pill-button:hover { background: var(--color-accent-tint); }
+.pill-button.is-primary { background: var(--color-accent); color: var(--color-on-accent); }
+
+.icon { width: 16px; height: 16px; }
 
 /* Board: 7 day columns + backlog */
-.board { flex: 1; min-height: 0; display: flex; gap: 8px; }
-.week { flex: 1; min-width: 0; display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 8px; }
-.board > .backlog { width: 220px; flex: none; }
+.board { flex: 1; min-height: 0; display: flex; gap: var(--space-3); }
+.week { flex: 1; min-width: 0; display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: var(--space-3); }
+.board > .backlog { width: 240px; flex: none; }
 
 app-ticket-list { display: block; min-height: 0; }
 
@@ -51,96 +190,165 @@ app-ticket-list { display: block; min-height: 0; }
   display: flex;
   flex-direction: column;
   height: 100%;
-  background: #e9e9e9;
-  border: 1px solid #d5d5d5;
-  border-radius: 4px;
-  padding: 6px;
-  gap: 6px;
+  padding: var(--space-3);
+  gap: var(--space-2);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
 }
-.list.is-today { background: #e3eefc; border-color: #2f80ed; }
-.list.is-past { opacity: 0.65; }
-.list-heading { font-weight: 600; padding: 2px 4px; }
+.list-heading {
+  padding: 2px var(--space-1) var(--space-1);
+  font-size: var(--font-size-small);
+  font-weight: var(--font-weight-heavy);
+  letter-spacing: var(--tracking-caps);
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+}
+.list.is-today { box-shadow: inset 0 0 0 2px var(--color-accent); }
+.list.is-today .list-heading { color: var(--color-accent); }
+/* Past days read as "spent": hollow column, quieter cards. No opacity, so text keeps AA contrast. */
+.list.is-past { background: transparent; box-shadow: inset 0 0 0 1px var(--color-border); }
+.list.is-past .card { background: var(--color-surface); }
+.list.is-past .card-title { color: var(--color-text-muted); }
+
+/* Backlog: royal-blue "glass" panel */
+.backlog .list {
+  background: linear-gradient(160deg, var(--color-glass-from), var(--color-glass-to));
+  box-shadow: inset 0 0 0 1px var(--color-glass-border);
+}
+.backlog .list-heading { color: var(--color-text); }
+.backlog .card { background: var(--color-glass-card); }
+.backlog .card-priority, .backlog .card-status, .backlog .add-button { color: var(--color-glass-text-muted); }
 
 .cards {
   flex: 1;
   min-height: 40px;
   overflow-y: auto;
+  overflow-x: hidden; /* otherwise computes to auto and shows scrollbars in narrow columns */
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: var(--space-2);
 }
+/* Completed cards aren't drag items; order keeps them below any drag placeholder. */
+.cards .is-locked { order: 1; }
+
 
 /* Card */
 .card {
   display: grid;
   grid-template-columns: auto minmax(0, 1fr);
   grid-template-rows: auto auto;
-  column-gap: 6px;
+  column-gap: var(--space-2);
   width: 100%;
   text-align: left;
-  padding: 6px 8px;
-  background: #fff;
-  border: 1px solid #ccc;
-  border-radius: 4px;
+  padding: var(--space-2) var(--space-3);
+  border: none;
+  border-radius: var(--radius-md);
+  background: var(--color-surface-raised);
+  transition: background var(--transition-fast);
 }
-.card-priority { grid-row: 1 / span 2; color: #888; font-size: 12px; min-width: 1.2em; }
+/* Inset ring: .cards is a scroll container and would clip the global outer ring. */
+.card:focus-visible { box-shadow: inset 0 0 0 2px var(--color-accent); }
+.card:hover { background: color-mix(in srgb, var(--color-surface-raised), white 6%); }
+.backlog .card:hover { background: color-mix(in srgb, var(--color-glass-card), white 6%); }
+.card-priority { grid-row: 1 / span 2; min-width: 1.2em; font-size: var(--font-size-small); font-weight: var(--font-weight-heavy); color: var(--color-text-muted); }
 .card-title { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.card-status { font-size: 12px; color: #555; display: flex; align-items: center; gap: 4px; }
+.card-status { display: flex; align-items: center; gap: 5px; min-width: 0; overflow: hidden; white-space: nowrap; font-size: var(--font-size-small); color: var(--color-text-muted); }
 
-.status-dot { width: 8px; height: 8px; border-radius: 50%; background: #9e9e9e; }
-.status-in_progress .status-dot { background: #2f80ed; }
-.status-completed .status-dot { background: #27ae60; }
+.status-dot { flex: none; width: 7px; height: 7px; border-radius: 50%; background: var(--color-text-muted); }
+.status-in_progress .status-dot { background: var(--color-accent); }
+.status-completed .status-dot { background: var(--color-success); }
 
-/* Add */
-.add-button { border: none; background: none; text-align: left; color: #555; padding: 4px; }
-.add-button:hover { color: #000; }
-.add-input { width: 100%; padding: 4px 6px; }
+/* Locked (completed) cards: flat outline + struck-through muted title, so they don't look draggable.
+   Selectors tie with the .list.is-past card rules (0,3,0) and win by coming later: keep this block below them. */
+.cards .is-locked .card { background: transparent; box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--color-text-muted), transparent 50%); }
+.cards .is-locked .card:hover { background: var(--color-surface-raised); }
+.cards .is-locked .card-title { color: var(--color-text-muted); text-decoration: line-through; }
+.backlog .cards .is-locked .card { box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--color-glass-text-muted), transparent 50%); }
+.backlog .cards .is-locked .card:hover { background: var(--color-glass-card); }
+.backlog .cards .is-locked .card-title { color: var(--color-glass-text-muted); }
+.cards .is-locked .card:focus-visible,
+.backlog .cards .is-locked .card:focus-visible { box-shadow: inset 0 0 0 2px var(--color-accent); }
+
+/* Add (.add-input is styled with the dialog fields below) */
+.add-button {
+  padding: var(--space-1);
+  border: none;
+  background: none;
+  text-align: left;
+  color: var(--color-text-muted);
+  transition: color var(--transition-fast);
+}
+.add-button:hover { color: var(--color-accent); }
+.add-input { width: 100%; }
 
 /* Dialogs (focus view + confirmation) */
 .dialog-backdrop {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.35);
+  background: var(--color-backdrop);
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 10;
 }
 .dialog {
-  background: #fff;
-  border-radius: 6px;
-  padding: 16px;
-  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.25);
+  padding: var(--space-5);
+  border-radius: var(--radius-xl);
+  background: var(--color-surface);
+  box-shadow: inset 0 0 0 1px var(--color-border), var(--shadow-lift);
 }
-.dialog-actions { display: flex; justify-content: flex-end; gap: 8px; }
-.danger { color: #b3261e; }
+.dialog-actions { display: flex; justify-content: flex-end; gap: var(--space-2); }
 
 .focus-view {
   width: min(640px, 90vw);
   height: min(560px, 85vh);
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: var(--space-3);
 }
-.focus-header { display: flex; justify-content: space-between; align-items: center; color: #666; }
-.focus-close { border: none; background: none; font-size: 16px; }
-.field { display: flex; flex-direction: column; gap: 4px; font-weight: 600; }
-.field input, .field select, .field textarea { font: inherit; font-weight: normal; padding: 4px 6px; }
+.focus-header { display: flex; justify-content: space-between; align-items: center; color: var(--color-text-muted); }
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  font-size: var(--font-size-small);
+  font-weight: var(--font-weight-heavy);
+  color: var(--color-text-muted);
+}
+.field input, .field select, .field textarea, .add-input {
+  padding: var(--space-2) var(--space-3);
+  border: none;
+  border-radius: var(--radius-sm);
+  background: var(--color-surface-raised);
+  color: var(--color-text);
+  font-size: var(--font-size-body);
+  font-weight: normal;
+}
 .field-grow { flex: 1; min-height: 0; }
 .field-grow textarea { flex: 1; resize: none; }
-.field-error { margin: -6px 0 0; color: #b3261e; font-size: 12px; }
+.field-error { margin: calc(-1 * var(--space-1)) 0 0; font-size: var(--font-size-small); color: var(--color-danger); }
 
 .confirm-dialog { width: min(360px, 90vw); }
+.confirm-dialog p { margin: 0 0 var(--space-4); }
 app-confirm-dialog .dialog-backdrop { z-index: 20; }
 
 /* Drag and drop (Angular CDK) */
 app-ticket-card { display: block; }
-.cdk-drag-preview .card { box-shadow: 0 6px 16px rgba(0, 0, 0, 0.25); }
+.cdk-drag-preview .card { box-shadow: var(--shadow-lift); }
 .cdk-drag-placeholder, .card-placeholder {
   min-height: 44px;
-  border: 2px dashed #aab;
-  border-radius: 4px;
-  background: #f7f7fb;
+  border: 2px dashed var(--color-accent);
+  border-radius: var(--radius-md);
+  background: var(--color-accent-tint);
 }
 .cdk-drag-animating { transition: transform 200ms ease; }
 .cards.cdk-drop-list-dragging app-ticket-card:not(.cdk-drag-placeholder) { transition: transform 200ms ease; }
+
+/* Narrow windows (down to the 900px minWidth): tighter spacing so day columns keep room for cards */
+@media (max-width: 1200px) {
+  app-root { padding: var(--space-3); }
+  .board, .week { gap: var(--space-2); }
+  .board > .backlog { width: 200px; }
+  .list { padding: var(--space-2); }
+  .card { padding: var(--space-2); column-gap: var(--space-1); }
+}
