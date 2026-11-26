@@ -1,0 +1,146 @@
+/* All app styles live here, so restyling later happens in one place. Deliberately plain for v1. */
+
+*, *::before, *::after { box-sizing: border-box; }
+
+html, body { height: 100%; margin: 0; }
+
+body {
+  font-family: system-ui, sans-serif;
+  font-size: 14px;
+  color: #222;
+  background: #f4f4f4;
+}
+
+app-root {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  padding: 8px;
+  gap: 8px;
+}
+
+button { font: inherit; cursor: pointer; }
+
+.loading { margin: 16px; color: #666; }
+
+/* Banners */
+.banner {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 10px;
+  background: #fff8d6;
+  border: 1px solid #e6d77a;
+}
+.banner-error { background: #fde2e1; border-color: #e5a3a0; }
+.banner button { border: none; background: none; }
+
+/* Week header */
+.week-header { display: flex; align-items: center; gap: 8px; }
+.week-label { font-size: 16px; margin: 0 8px; min-width: 260px; text-align: center; }
+
+/* Board: 7 day columns + backlog */
+.board { flex: 1; min-height: 0; display: flex; gap: 8px; }
+.week { flex: 1; min-width: 0; display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 8px; }
+.board > .backlog { width: 220px; flex: none; }
+
+app-ticket-list { display: block; min-height: 0; }
+
+.list {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background: #e9e9e9;
+  border: 1px solid #d5d5d5;
+  border-radius: 4px;
+  padding: 6px;
+  gap: 6px;
+}
+.list.is-today { background: #e3eefc; border-color: #2f80ed; }
+.list.is-past { opacity: 0.65; }
+.list-heading { font-weight: 600; padding: 2px 4px; }
+
+.cards {
+  flex: 1;
+  min-height: 40px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+/* Card */
+.card {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  grid-template-rows: auto auto;
+  column-gap: 6px;
+  width: 100%;
+  text-align: left;
+  padding: 6px 8px;
+  background: #fff;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+.card-priority { grid-row: 1 / span 2; color: #888; font-size: 12px; min-width: 1.2em; }
+.card-title { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.card-status { font-size: 12px; color: #555; display: flex; align-items: center; gap: 4px; }
+
+.status-dot { width: 8px; height: 8px; border-radius: 50%; background: #9e9e9e; }
+.status-in_progress .status-dot { background: #2f80ed; }
+.status-completed .status-dot { background: #27ae60; }
+
+/* Add */
+.add-button { border: none; background: none; text-align: left; color: #555; padding: 4px; }
+.add-button:hover { color: #000; }
+.add-input { width: 100%; padding: 4px 6px; }
+
+/* Dialogs (focus view + confirmation) */
+.dialog-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.35);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+}
+.dialog {
+  background: #fff;
+  border-radius: 6px;
+  padding: 16px;
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.25);
+}
+.dialog-actions { display: flex; justify-content: flex-end; gap: 8px; }
+.danger { color: #b3261e; }
+
+.focus-view {
+  width: min(640px, 90vw);
+  height: min(560px, 85vh);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.focus-header { display: flex; justify-content: space-between; align-items: center; color: #666; }
+.focus-close { border: none; background: none; font-size: 16px; }
+.field { display: flex; flex-direction: column; gap: 4px; font-weight: 600; }
+.field input, .field select, .field textarea { font: inherit; font-weight: normal; padding: 4px 6px; }
+.field-grow { flex: 1; min-height: 0; }
+.field-grow textarea { flex: 1; resize: none; }
+.field-error { margin: -6px 0 0; color: #b3261e; font-size: 12px; }
+
+.confirm-dialog { width: min(360px, 90vw); }
+app-confirm-dialog .dialog-backdrop { z-index: 20; }
+
+/* Drag and drop (Angular CDK) */
+app-ticket-card { display: block; }
+.cdk-drag-preview .card { box-shadow: 0 6px 16px rgba(0, 0, 0, 0.25); }
+.cdk-drag-placeholder, .card-placeholder {
+  min-height: 44px;
+  border: 2px dashed #aab;
+  border-radius: 4px;
+  background: #f7f7fb;
+}
+.cdk-drag-animating { transition: transform 200ms ease; }
+.cards.cdk-drop-list-dragging app-ticket-card:not(.cdk-drag-placeholder) { transition: transform 200ms ease; }
