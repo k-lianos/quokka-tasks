@@ -259,9 +259,9 @@ app-ticket-list { display: block; min-height: 0; }
 .status-completed .status-dot { background: var(--color-success); }
 
 /* Locked (completed) cards: flat outline + struck-through muted title, so they don't look draggable.
-   Selectors go through .cards to outrank the .list.is-past card rules. */
+   Selectors tie with the .list.is-past card rules (0,3,0) and win by coming later: keep this block below them. */
 .cards .is-locked .card { background: transparent; box-shadow: inset 0 0 0 1px var(--color-border); }
-.cards .is-locked .card:hover { background: var(--color-surface); }
+.cards .is-locked .card:hover { background: var(--color-surface-raised); }
 .cards .is-locked .card-title { color: var(--color-text-muted); text-decoration: line-through; }
 .backlog .cards .is-locked .card { box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--color-glass-text-muted), transparent 50%); }
 .backlog .cards .is-locked .card:hover { background: var(--color-glass-card); }
