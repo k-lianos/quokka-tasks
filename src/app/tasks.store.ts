@@ -1,11 +1,12 @@
 import { Injectable, signal } from '@angular/core';
 import { todayLocal } from '../domain/dates';
 import { rollover } from '../domain/rollover';
+import { sinkCompleted } from '../domain/tickets';
 import type { Ticket } from '../shared/types';
 
 const DATE_CHECK_MS = 60_000;
 
-/** Single source of truth for tickets in the UI. Every change enforces rollover and saves the whole file. */
+/** Single source of truth for tickets in the UI. Every change enforces rollover and the completed-at-bottom order and saves the whole file. */
 @Injectable({ providedIn: 'root' })
 export class TasksStore {
   private readonly _loaded = signal(false);
@@ -33,7 +34,7 @@ export class TasksStore {
     }
     this._notice.set(result.notice);
     const loaded = result.data.tickets;
-    const rolled = rollover(loaded, this._today(), new Date().toISOString());
+    const rolled = sinkCompleted(rollover(loaded, this._today(), new Date().toISOString()));
     this._tickets.set(rolled);
     this._loaded.set(true);
     if (rolled !== loaded) await this.persist();
@@ -45,7 +46,7 @@ export class TasksStore {
   async change(fn: (tickets: Ticket[]) => Ticket[]): Promise<void> {
     if (!this._loaded()) return;
     const before = this._tickets();
-    const next = rollover(fn(before), this._today(), new Date().toISOString());
+    const next = sinkCompleted(rollover(fn(before), this._today(), new Date().toISOString()));
     if (next === before) return;
     this._tickets.set(next);
     await this.persist();

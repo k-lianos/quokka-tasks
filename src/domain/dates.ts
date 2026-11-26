@@ -2,7 +2,11 @@
 // which would shift the day for anyone east or west of UTC.
 
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-const WEEKDAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+const MONTHS_LONG = [
+  'January', 'February', 'March', 'April', 'May', 'June',
+  'July', 'August', 'September', 'October', 'November', 'December',
+];
+const WEEKDAYS =['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
 const pad = (n: number): string => String(n).padStart(2, '0');
 
@@ -42,20 +46,27 @@ export function isoWeekNumber(date: string): number {
   return Math.floor(dayOfYear / 7) + 1;
 }
 
-export function formatWeekLabel(weekStart: string): string {
+export interface WeekHeading {
+  /** e.g. 'Week 48 · 2026' — the year is the ISO-week year (year of its Thursday). */
+  eyebrow: string;
+  /** e.g. '23 – 29 November', '30 November – 6 December', '28 December 2026 – 3 January 2027'. */
+  range: string;
+}
+
+export function formatWeekHeading(weekStart: string): WeekHeading {
   const start = parse(weekStart);
   const end = parse(addDays(weekStart, 6));
-  const week = `Week ${isoWeekNumber(weekStart)}`;
-  const endText = `${end.getDate()} ${MONTHS[end.getMonth()]} ${end.getFullYear()}`;
+  const isoYear = parse(addDays(weekStart, 3)).getFullYear();
+  const day = (d: Date): string => `${d.getDate()} ${MONTHS_LONG[d.getMonth()]}`;
   let range: string;
   if (start.getFullYear() !== end.getFullYear()) {
-    range = `${start.getDate()} ${MONTHS[start.getMonth()]} ${start.getFullYear()} – ${endText}`;
+    range = `${day(start)} ${start.getFullYear()} – ${day(end)} ${end.getFullYear()}`;
   } else if (start.getMonth() !== end.getMonth()) {
-    range = `${start.getDate()} ${MONTHS[start.getMonth()]} – ${endText}`;
+    range = `${day(start)} – ${day(end)}`;
   } else {
-    range = `${start.getDate()}–${endText}`;
+    range = `${start.getDate()} – ${day(end)}`;
   }
-  return `${week} · ${range}`;
+  return { eyebrow: `Week ${isoWeekNumber(weekStart)} · ${isoYear}`, range };
 }
 
 export function formatDayHeader(date: string): string {

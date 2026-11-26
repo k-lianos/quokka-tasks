@@ -1,5 +1,5 @@
 import { CdkDrag, CdkDragDrop, CdkDragPlaceholder, CdkDropList } from '@angular/cdk/drag-drop';
-import { Component, inject, input, output } from '@angular/core';
+import { Component, computed, inject, input, output } from '@angular/core';
 import { canDropInto } from '../domain/drop';
 import type { Ticket } from '../shared/types';
 import { AddTicket } from './add-ticket';
@@ -24,7 +24,10 @@ const CLICK_AFTER_DRAG_MS = 150;
         [cdkDropListSortingDisabled]="isPast()"
         (cdkDropListDropped)="dropped.emit($event)"
       >
-        @for (t of tickets(); track t.id) {
+        <!-- Only open tickets are drag items, so CDK's indexes match the domain's. Completed cards
+             are plain children with CSS order: 1, so a placeholder CDK appends at the end of the
+             list still shows above the pile. -->
+        @for (t of openTickets(); track t.id) {
           <app-ticket-card
             cdkDrag
             [cdkDragData]="t.id"
@@ -34,6 +37,9 @@ const CLICK_AFTER_DRAG_MS = 150;
           >
             <div *cdkDragPlaceholder class="card-placeholder"></div>
           </app-ticket-card>
+        }
+        @for (t of completedTickets(); track t.id) {
+          <app-ticket-card class="is-locked" [ticket]="t" (open)="onOpen(t.id)" />
         }
       </div>
       @if (!isPast()) {
@@ -50,6 +56,10 @@ export class TicketList {
   readonly isPast = input(false);
   readonly open = output<string>();
   readonly dropped = output<CdkDragDrop<string | null>>();
+
+  /** The store keeps completed tickets last, so these two are the list split at the pile. */
+  protected readonly openTickets = computed(() => this.tickets().filter((t) => t.status !== 'completed'));
+  protected readonly completedTickets = computed(() => this.tickets().filter((t) => t.status === 'completed'));
 
   private readonly store = inject(TasksStore);
   protected lastDragEnd = 0;
