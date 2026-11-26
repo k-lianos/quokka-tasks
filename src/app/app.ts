@@ -7,16 +7,25 @@ import { FocusView } from './focus-view';
 import { TasksStore } from './tasks.store';
 import { TicketList } from './ticket-list';
 import { WeekHeader } from './week-header';
+import { WindowControls } from './window-controls';
 
 @Component({
   selector: 'app-root',
-  imports: [WeekHeader, TicketList, FocusView, CdkDropListGroup],
+  imports: [WeekHeader, WindowControls, TicketList, FocusView, CdkDropListGroup],
   template: `
     @if (store.loadError(); as error) {
+      <div class="title-bar title-strip"><app-window-controls /></div>
       <div class="banner banner-error">{{ error }}</div>
     } @else if (!store.loaded()) {
+      <div class="title-bar title-strip"><app-window-controls /></div>
       <p class="loading">Loading…</p>
     } @else {
+      <app-week-header
+        [heading]="weekHeading()"
+        (prev)="viewedWeekStart.set(addDays(viewedWeekStart(), -7))"
+        (next)="viewedWeekStart.set(addDays(viewedWeekStart(), 7))"
+        (today)="viewedWeekStart.set(startOfWeek(store.today()))"
+      />
       @if (store.notice(); as notice) {
         <div class="banner">
           <span>{{ notice }}</span>
@@ -26,12 +35,6 @@ import { WeekHeader } from './week-header';
       @if (store.saveError()) {
         <div class="banner banner-error">Couldn't save — your latest changes are not on disk</div>
       }
-      <app-week-header
-        [heading]="weekHeading()"
-        (prev)="viewedWeekStart.set(addDays(viewedWeekStart(), -7))"
-        (next)="viewedWeekStart.set(addDays(viewedWeekStart(), 7))"
-        (today)="viewedWeekStart.set(startOfWeek(store.today()))"
-      />
       <main class="board" cdkDropListGroup>
         <div class="week">
           @for (day of days(); track day.date) {
