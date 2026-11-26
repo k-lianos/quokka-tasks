@@ -22,12 +22,14 @@ const CLICK_AFTER_DRAG_MS = 150;
         [cdkDropListData]="date()"
         [cdkDropListEnterPredicate]="acceptsDrop"
         [cdkDropListSortingDisabled]="isPast()"
+        [cdkDropListSortPredicate]="sortAbovePile"
         (cdkDropListDropped)="dropped.emit($event)"
       >
         @for (t of tickets(); track t.id) {
           <app-ticket-card
             cdkDrag
             [cdkDragData]="t.id"
+            [cdkDragDisabled]="t.status === 'completed'"
             [ticket]="t"
             (cdkDragEnded)="lastDragEnd = now()"
             (open)="onOpen(t.id)"
@@ -57,6 +59,14 @@ export class TicketList {
 
   /** Refuses both the empty area and the cards of a past day. */
   protected readonly acceptsDrop = (): boolean => canDropInto(this.date(), this.store.today());
+
+  /** The drag placeholder may not go below the last open ticket. */
+  protected readonly sortAbovePile = (index: number, drag: CdkDrag): boolean => {
+    const list = this.tickets();
+    const openCount = list.filter((t) => t.status !== 'completed').length;
+    const fromHere = list.some((t) => t.id === drag.data);
+    return index <= openCount - (fromHere ? 1 : 0);
+  };
 
   protected onOpen(id: string): void {
     if (Date.now() - this.lastDragEnd < CLICK_AFTER_DRAG_MS) return;
