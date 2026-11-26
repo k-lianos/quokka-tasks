@@ -258,6 +258,17 @@ app-ticket-list { display: block; min-height: 0; }
 .status-in_progress .status-dot { background: var(--color-accent); }
 .status-completed .status-dot { background: var(--color-success); }
 
+/* Locked (completed) cards: flat outline + struck-through muted title, so they don't look draggable.
+   Selectors go through .cards to outrank the .list.is-past card rules. */
+.cards .is-locked .card { background: transparent; box-shadow: inset 0 0 0 1px var(--color-border); }
+.cards .is-locked .card:hover { background: var(--color-surface); }
+.cards .is-locked .card-title { color: var(--color-text-muted); text-decoration: line-through; }
+.backlog .cards .is-locked .card { box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--color-glass-text-muted), transparent 50%); }
+.backlog .cards .is-locked .card:hover { background: var(--color-glass-card); }
+.backlog .cards .is-locked .card-title { color: var(--color-glass-text-muted); }
+.cards .is-locked .card:focus-visible,
+.backlog .cards .is-locked .card:focus-visible { box-shadow: inset 0 0 0 2px var(--color-accent); }
+
 /* Add (.add-input is styled with the dialog fields below) */
 .add-button {
   padding: var(--space-1);
