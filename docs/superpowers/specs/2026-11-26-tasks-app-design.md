@@ -2,6 +2,7 @@
 
 Date: 2026-11-26
 Status: draft, awaiting approval
+Completed-ticket behaviour: see `2026-11-26-completed-tickets-design.md`.
 Stack: chosen by the user in conversation on 2026-11-26 (Electron + Angular, with the picks below). The first implementation step updates `CLAUDE.md` to record it.
 
 ## Intent
@@ -123,6 +124,7 @@ All dates are **local** calendar dates (the computer's timezone), never UTC date
 - Show: priority number (`position + 1`), title, status as a small coloured dot plus label (grey = Pending, blue = In Progress, green = Completed).
 - Long titles are truncated with an ellipsis on the card; the full title is in the focus view.
 - Clicking a card opens the focus view. Dragging a card does not open it.
+- Completed cards sit at the bottom of their list (below all open tickets) and can't be dragged.
 
 ### Creating
 
@@ -143,6 +145,7 @@ All dates are **local** calendar dates (the computer's timezone), never UTC date
 - Drag a card to another day (in the visible week) or to/from the backlog to move it; it lands where it is dropped.
 - Moving a ticket between weeks is done by dropping it in the backlog, navigating, and dragging it out again. (No cross-week drag in this iteration.)
 - **Past days** (dates before today) are not drop targets. Their tickets can still be dragged out (to today, a future day or the backlog).
+- Completed tickets can't be dragged; set the status back first. Open tickets dropped at or below the completed pile land just above it.
 
 ### Rollover
 
@@ -150,7 +153,7 @@ Invariant: **no ticket with status Pending or In Progress has a date before toda
 
 - Enforced on app start, when the local date changes while the app is running (checked at least every minute and when the window regains focus), and after any change to the data (e.g. a past Completed ticket set back to Pending).
 - Offending tickets move to today and are placed at the **top** of today's list, ahead of tickets already there. Among themselves they keep their order: earlier original date first, then original position.
-- Completed tickets stay on their original day as a record.
+- Completed tickets stay on their original day, at the bottom of it, as a record.
 - *(Designer's call)* If the date changes while the app is open and the user is viewing the week that contained the old "today", the view follows to the week containing the new today. If they're viewing some other week, the view stays put.
 
 ### Storage
