@@ -1,4 +1,4 @@
-import { contextBridge, ipcRenderer } from 'electron';
+import { contextBridge, ipcRenderer, type IpcRendererEvent } from 'electron';
 import type { IPC as SharedIPC, TasksApi } from '../src/shared/api';
 import type { DataFile } from '../src/shared/types';
 
@@ -9,6 +9,11 @@ const IPC = {
   save: 'tasks:save',
   flushRequest: 'app:flush-request',
   flushDone: 'app:flush-done',
+  windowMinimize: 'window:minimize',
+  windowToggleMaximize: 'window:toggle-maximize',
+  windowClose: 'window:close',
+  windowIsMaximized: 'window:is-maximized',
+  windowMaximizedChange: 'window:maximized-change',
 } as const satisfies typeof SharedIPC;
 
 const api: TasksApi = {
@@ -23,6 +28,17 @@ const api: TasksApi = {
       }
       ipcRenderer.send(IPC.flushDone);
     });
+  },
+  window: {
+    minimize: () => ipcRenderer.send(IPC.windowMinimize),
+    toggleMaximize: () => ipcRenderer.send(IPC.windowToggleMaximize),
+    close: () => ipcRenderer.send(IPC.windowClose),
+    isMaximized: () => ipcRenderer.invoke(IPC.windowIsMaximized),
+    onMaximizedChange(handler) {
+      const listener = (_e: IpcRendererEvent, maximized: boolean): void => handler(maximized);
+      ipcRenderer.on(IPC.windowMaximizedChange, listener);
+      return () => ipcRenderer.removeListener(IPC.windowMaximizedChange, listener);
+    },
   },
 };
 

@@ -70,7 +70,8 @@ app-root {
   display: flex;
   flex-direction: column;
   height: 100%;
-  padding: var(--space-4);
+  --app-padding: var(--space-4); /* read by .title-bar to reach the window edge */
+  padding: var(--app-padding);
   gap: var(--space-3);
 }
 
@@ -120,8 +121,18 @@ button { cursor: pointer; }
 }
 .icon-button:hover { background: var(--color-accent-tint); color: var(--color-text); }
 
-/* Week header: brand lockup | eyebrow + big range | ‹ Today › pill */
-.week-header { display: flex; align-items: center; gap: var(--space-5); padding: var(--space-1) var(--space-1) 0; }
+/* Week header: [brand lockup | eyebrow + big range]  ‹ Today › pill (centred)  window controls.
+   Equal outer columns keep the pill centred on the window. The left one never shrinks below
+   its content, so on narrow windows the pill moves right instead of the date being cut off. */
+.week-header {
+  display: grid;
+  grid-template-columns: minmax(max-content, 1fr) auto minmax(0, 1fr);
+  align-items: center;
+  gap: var(--space-5);
+  padding: var(--space-1) var(--space-1) 0;
+}
+.week-header-lead { display: flex; align-items: center; gap: var(--space-5); min-width: 0; }
+.week-header app-window-controls { justify-self: end; }
 
 .brand { display: flex; align-items: center; gap: 9px; flex: none; }
 .brand-mark { width: 30px; height: 30px; color: var(--color-accent); }
@@ -178,6 +189,20 @@ button { cursor: pointer; }
 .pill-button.is-primary { background: var(--color-accent); color: var(--color-on-accent); }
 
 .icon { width: 16px; height: 16px; }
+
+/* Title bar: the window is frameless, so the header (or, while loading, a bare strip)
+   is the drag handle. It bleeds into app-root's padding to reach the top window edge. */
+.title-bar {
+  -webkit-app-region: drag;
+  margin: calc(-1 * var(--app-padding)) calc(-1 * var(--app-padding)) 0;
+  padding: calc(var(--app-padding) + var(--space-1)) calc(var(--app-padding) + var(--space-1)) 0;
+}
+.title-bar button { -webkit-app-region: no-drag; }
+.title-strip { display: flex; justify-content: flex-end; }
+
+/* Window controls: minimise, maximise/restore, close */
+.window-controls { display: flex; gap: 2px; flex: none; }
+.window-control-close:hover { background: color-mix(in srgb, var(--color-danger) 15%, transparent); color: var(--color-danger); }
 
 /* Board: 7 day columns + backlog */
 .board { flex: 1; min-height: 0; display: flex; gap: var(--space-3); }
@@ -290,6 +315,7 @@ app-ticket-list { display: block; min-height: 0; }
   align-items: center;
   justify-content: center;
   z-index: 10;
+  -webkit-app-region: no-drag; /* drag regions ignore stacking: keep the header under a dialog clickable */
 }
 .dialog {
   padding: var(--space-5);
@@ -346,7 +372,7 @@ app-ticket-card { display: block; }
 
 /* Narrow windows (down to the 900px minWidth): tighter spacing so day columns keep room for cards */
 @media (max-width: 1200px) {
-  app-root { padding: var(--space-3); }
+  app-root { --app-padding: var(--space-3); }
   .board, .week { gap: var(--space-2); }
   .board > .backlog { width: 200px; }
   .list { padding: var(--space-2); }
