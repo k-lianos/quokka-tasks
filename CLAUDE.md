@@ -23,6 +23,7 @@ Stack: Electron (main process in `electron/`, compiled with `tsc`), Angular 22 U
 - `src/domain/` and `src/shared/` import nothing from Angular, Electron, Node or the DOM. They are compiled by both builds and hold all business rules, which are unit-tested.
 - All dependencies are devDependencies (the UI is bundled; the main process uses only Node built-ins).
 - All styles live in `src/styles.css`.
+- UI follows `docs/style-guide.md`: use the design tokens in `src/styles.css`, no raw colours in rules.
 
 ## Workflow
 

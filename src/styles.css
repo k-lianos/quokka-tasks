@@ -16,6 +16,7 @@
   --color-glass-to: #0a1a55;
   --color-glass-border: #2d5cff66;
   --color-glass-card: rgb(255 255 255 / 0.07);
+  --color-glass-text-muted: #b4c0d6; /* muted text on the glass panel; --color-text-muted fails AA there */
   --color-text: #f2f6fa;
   --color-text-muted: #8a97a8;
   --color-success: #3ddc97;
@@ -213,6 +214,7 @@ app-ticket-list { display: block; min-height: 0; }
 }
 .backlog .list-heading { color: var(--color-text); }
 .backlog .card { background: var(--color-glass-card); }
+.backlog .card-priority, .backlog .card-status, .backlog .add-button { color: var(--color-glass-text-muted); }
 
 .cards {
   flex: 1;
@@ -222,6 +224,8 @@ app-ticket-list { display: block; min-height: 0; }
   flex-direction: column;
   gap: var(--space-2);
 }
+
+.cards { overflow-x: hidden; }
 
 /* Card */
 .card {
@@ -241,9 +245,9 @@ app-ticket-list { display: block; min-height: 0; }
 .backlog .card:hover { background: color-mix(in srgb, var(--color-glass-card), white 6%); }
 .card-priority { grid-row: 1 / span 2; min-width: 1.2em; font-size: var(--font-size-small); font-weight: var(--font-weight-heavy); color: var(--color-text-muted); }
 .card-title { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.card-status { display: flex; align-items: center; gap: 5px; font-size: var(--font-size-small); color: var(--color-text-muted); }
+.card-status { display: flex; align-items: center; gap: 5px; min-width: 0; overflow: hidden; white-space: nowrap; font-size: var(--font-size-small); color: var(--color-text-muted); }
 
-.status-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--color-text-muted); }
+.status-dot { flex: none; width: 7px; height: 7px; border-radius: 50%; background: var(--color-text-muted); }
 .status-in_progress .status-dot { background: var(--color-accent); }
 .status-completed .status-dot { background: var(--color-success); }
 
@@ -321,3 +325,12 @@ app-ticket-card { display: block; }
 }
 .cdk-drag-animating { transition: transform 200ms ease; }
 .cards.cdk-drop-list-dragging app-ticket-card:not(.cdk-drag-placeholder) { transition: transform 200ms ease; }
+
+/* Narrow windows (down to the 900px minWidth): tighter spacing so day columns keep room for cards */
+@media (max-width: 1200px) {
+  app-root { padding: var(--space-3); }
+  .board, .week { gap: var(--space-2); }
+  .board > .backlog { width: 200px; }
+  .list { padding: var(--space-2); }
+  .card { padding: var(--space-2); column-gap: var(--space-1); }
+}
