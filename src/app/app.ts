@@ -1,13 +1,14 @@
-import { Component, computed, effect, inject, signal, untracked } from '@angular/core';
+import { Component, computed, effect, inject, signal, untracked, viewChild } from '@angular/core';
 import { addDays, formatDayHeader, formatWeekLabel, nextViewedWeek, startOfWeek, weekDates } from '../domain/dates';
 import { listOf } from '../domain/tickets';
+import { FocusView } from './focus-view';
 import { TasksStore } from './tasks.store';
 import { TicketList } from './ticket-list';
 import { WeekHeader } from './week-header';
 
 @Component({
   selector: 'app-root',
-  imports: [WeekHeader, TicketList],
+  imports: [WeekHeader, TicketList, FocusView],
   template: `
     @if (store.loadError(); as error) {
       <div class="banner banner-error">{{ error }}</div>
@@ -44,6 +45,9 @@ import { WeekHeader } from './week-header';
         </div>
         <app-ticket-list class="backlog" heading="Backlog" [date]="null" [tickets]="backlog()" (open)="openTicket($event)" />
       </main>
+      @if (openedTicket(); as ticket) {
+        <app-focus-view [ticket]="ticket" (closed)="openTicketId.set(null)" />
+      }
     }
   `,
 })
@@ -68,9 +72,16 @@ export class App {
     }));
   });
   protected readonly backlog = computed(() => listOf(this.store.tickets(), null));
+  protected readonly openedTicket = computed(() => {
+    const id = this.openTicketId();
+    return id ? (this.store.tickets().find((t) => t.id === id) ?? null) : null;
+  });
+  private readonly focusView = viewChild(FocusView);
 
   constructor() {
     void this.store.init();
+    // Before the window closes, save whatever is still being typed in the focus view.
+    window.api.onFlushRequest(() => this.focusView()?.flush() ?? Promise.resolve());
 
     // When the date changes while the app is open, follow to the new week if the user was on "this week".
     let previousToday = this.store.today();

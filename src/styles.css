@@ -95,3 +95,40 @@ app-ticket-list { display: block; min-height: 0; }
 .add-button { border: none; background: none; text-align: left; color: #555; padding: 4px; }
 .add-button:hover { color: #000; }
 .add-input { width: 100%; padding: 4px 6px; }
+
+/* Dialogs (focus view + confirmation) */
+.dialog-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.35);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+}
+.dialog {
+  background: #fff;
+  border-radius: 6px;
+  padding: 16px;
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.25);
+}
+.dialog-actions { display: flex; justify-content: flex-end; gap: 8px; }
+.danger { color: #b3261e; }
+
+.focus-view {
+  width: min(640px, 90vw);
+  height: min(560px, 85vh);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.focus-header { display: flex; justify-content: space-between; align-items: center; color: #666; }
+.focus-close { border: none; background: none; font-size: 16px; }
+.field { display: flex; flex-direction: column; gap: 4px; font-weight: 600; }
+.field input, .field select, .field textarea { font: inherit; font-weight: normal; padding: 4px 6px; }
+.field-grow { flex: 1; min-height: 0; }
+.field-grow textarea { flex: 1; resize: none; }
+.field-error { margin: -6px 0 0; color: #b3261e; font-size: 12px; }
+
+.confirm-dialog { width: min(360px, 90vw); }
+app-confirm-dialog .dialog-backdrop { z-index: 20; }
