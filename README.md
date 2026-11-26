@@ -1,59 +1,49 @@
-# QuokkaTasks
+# Quokka Tasks
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 22.3.0.
+A personal, offline desktop tasks app: a Monday–Sunday week view plus a backlog of tickets
+(title, description, status). Drag tickets to plan and prioritise them. Unfinished tickets from
+past days move to today automatically.
 
-## Development server
+Built with Electron and Angular. No internet connection is needed or used.
 
-To start a local development server, run:
-
-```bash
-ng serve
-```
-
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
-
-## Code scaffolding
-
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
+## Run it
 
 ```bash
-ng generate component component-name
+npm install
+npm start          # builds everything and opens the app
 ```
 
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
+For development with live reload, use two terminals:
 
 ```bash
-ng generate --help
+npm run serve      # Angular dev server on http://localhost:4200
+npm run dev        # Electron window pointed at the dev server
 ```
 
-## Building
+Don't open `http://localhost:4200` in a normal browser: the UI needs the Electron window to
+read and save its data.
 
-To build the project run:
+## Test and package
 
 ```bash
-ng build
+npm test           # unit tests (Vitest)
+npm run build      # build UI + main process (also the type check)
+npm run make       # .deb and .zip in out/make/
 ```
 
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
+Install the package with `sudo apt install ./out/make/deb/x64/quokka-tasks_*_amd64.deb`.
 
-## Running unit tests
+## Your data
 
-To execute unit tests with the [Vitest](https://vitest.dev/) test runner, use the following command:
+All tickets are in one file:
 
-```bash
-ng test
-```
+- Ubuntu: `~/.config/quokka-tasks/tasks.json`
+- Windows: `%APPDATA%\quokka-tasks\tasks.json`
+- macOS: `~/Library/Application Support/quokka-tasks/tasks.json`
 
-## Running end-to-end tests
+Back it up by copying that file. If the file is ever unreadable, the app keeps it as
+`tasks.corrupt-<time>.json` next to it and starts empty. It never overwrites it.
 
-For end-to-end (e2e) testing, run:
+## Design
 
-```bash
-ng e2e
-```
-
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
-
-## Additional Resources
-
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+See `docs/superpowers/specs/2026-11-26-tasks-app-design.md`.
