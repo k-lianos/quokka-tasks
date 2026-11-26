@@ -86,10 +86,15 @@ export function moveTicket(tickets: Ticket[], id: string, toDate: string | null,
 /** Order every list open-first, completed after, each group keeping its order. Stable, so a ticket
  *  that just became completed lands at the top of the pile and a reopened one becomes the last open. */
 export function sinkCompleted(tickets: Ticket[]): Ticket[] {
-  const dates = new Set(tickets.map((t) => t.date));
+  const lists = new Map<string | null, Ticket[]>();
+  for (const t of tickets) {
+    const list = lists.get(t.date);
+    if (list) list.push(t);
+    else lists.set(t.date, [t]);
+  }
   let next = tickets;
-  for (const date of dates) {
-    const ordered = listOf(tickets, date).sort(
+  for (const [date, list] of lists) {
+    const ordered = list.sort(
       (p, q) => Number(p.status === 'completed') - Number(q.status === 'completed') || p.position - q.position,
     );
     next = placeList(next, date, ordered.map((t) => t.id), new Set(), '');
