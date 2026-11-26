@@ -1,4 +1,5 @@
 import { CdkDrag, CdkDragDrop, CdkDragPlaceholder, CdkDropList } from '@angular/cdk/drag-drop';
+import { CdkScrollable } from '@angular/cdk/scrolling';
 import { Component, computed, inject, input } from '@angular/core';
 import { nowTicket, upNextToIndex } from '../domain/day';
 import { canDropInto } from '../domain/drop';
@@ -15,9 +16,10 @@ const CLICK_AFTER_DRAG_MS = 150;
 /** One day: on today, the Now ticket, then Up next and Done. Other days: Planned and Done. Past days are read-only. */
 @Component({
   selector: 'app-day-page',
-  imports: [NowBlock, DayRow, AddTicket, CdkDropList, CdkDrag, CdkDragPlaceholder],
+  imports: [NowBlock, DayRow, AddTicket, CdkDropList, CdkDrag, CdkDragPlaceholder, CdkScrollable],
   template: `
-    <div class="day-page">
+    <!-- cdkScrollable: the page (not the drop list) scrolls, and drag and drop must know to keep drops accurate. -->
+    <div class="day-page" cdkScrollable>
       @if (isToday()) {
         <app-now-block [ticket]="now()" [emptyMessage]="tickets().length ? 'All done for today' : 'Nothing planned for today'" />
       }
