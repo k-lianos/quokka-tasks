@@ -132,3 +132,15 @@ app-ticket-list { display: block; min-height: 0; }
 
 .confirm-dialog { width: min(360px, 90vw); }
 app-confirm-dialog .dialog-backdrop { z-index: 20; }
+
+/* Drag and drop (Angular CDK) */
+app-ticket-card { display: block; }
+.cdk-drag-preview .card { box-shadow: 0 6px 16px rgba(0, 0, 0, 0.25); }
+.cdk-drag-placeholder, .card-placeholder {
+  min-height: 44px;
+  border: 2px dashed #aab;
+  border-radius: 4px;
+  background: #f7f7fb;
+}
+.cdk-drag-animating { transition: transform 200ms ease; }
+.cards.cdk-drop-list-dragging app-ticket-card:not(.cdk-drag-placeholder) { transition: transform 200ms ease; }
