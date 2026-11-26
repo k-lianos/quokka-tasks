@@ -2,7 +2,7 @@
 
 Date: 2026-11-26
 Status: draft, awaiting approval
-Stack: chosen by the user in conversation on 2026-11-26 (Electron, with the picks below). The first implementation step updates `CLAUDE.md` to record it.
+Stack: chosen by the user in conversation on 2026-11-26 (Electron + Angular, with the picks below). The first implementation step updates `CLAUDE.md` to record it.
 
 ## Intent
 
@@ -47,17 +47,26 @@ Sync, accounts or multiple users; recurring tickets; tags, labels or colours per
 | Local web server + browser | Not a native app; the user would have to start a server. | Rejected |
 | Flutter / non-JS native | Leaves the language the user is comfortable with. | Rejected |
 
+UI framework (within Electron):
+
+| Option | Trade-off | Verdict |
+|---|---|---|
+| React + dnd-kit + Forge's Vite template | Smallest, one build tool for everything. | Initially picked, then replaced |
+| **Angular + CDK drag-drop** | Two build tools (Angular CLI for UI, `tsc` + Forge for the shell); more boilerplate. First-party drag-drop built for connected lists; the user knows Angular better. | **Chosen** |
+
 ## Stack (decided)
 
-- **Electron**, built and packaged with **Electron Forge** using its **Vite** plugin.
-- **TypeScript**.
-- **React** for the UI.
-- **dnd-kit** for drag and drop (sortable lists plus moving items between containers).
-- **Storage:** one JSON file in Electron's `userData` directory (e.g. `~/.config/quokka-tasks/tasks.json` on Ubuntu).
-- **npm** as package manager.
-- **Vitest** for tests.
+- **Electron** (main process + preload in TypeScript, compiled with `tsc`).
+- **Angular** for the UI (standalone components, signals, zoneless), built with the Angular CLI. Chosen over React because the user knows Angular better and will maintain and restyle the app.
+- **Angular CDK drag-drop** (`@angular/cdk`) for drag and drop: connected sortable lists, exactly the week + backlog shape.
+- **Electron Forge** only for packaging (`.deb` and zip makers). The Angular CLI builds the UI; Forge packages the compiled output.
+- **TypeScript** everywhere.
+- **Storage:** one JSON file in Electron's `userData` directory (`~/.config/quokka-tasks/tasks.json` on Ubuntu).
+- **npm** as package manager, using the public npm registry via a project `.npmrc` (the user's global config points at a local registry).
+- **Vitest** for unit tests of the framework-free logic.
+- No linter in iteration 1 (strict TypeScript and Angular strict templates act as the static check); `angular-eslint` can be added later with approval.
 
-Supporting packages these require (Forge makers and Vite plugin, `@vitejs/plugin-react`, `@types/*`, dnd-kit's sortable/utilities packages) are covered by this approval; the plan lists them. Any other dependency needs the user's approval first.
+Approved packages: `@angular/core`, `@angular/common`, `@angular/compiler`, `@angular/platform-browser`, `@angular/forms`, `@angular/cdk`, `rxjs`, `tslib` (all bundled into the UI, so kept as devDependencies), and dev tools `@angular/cli`, `@angular/build`, `@angular/compiler-cli`, `typescript`, `vitest`, `electron`, `@electron-forge/cli`, `@electron-forge/maker-deb`, `@electron-forge/maker-zip`, `@types/node`. Any other dependency needs the user's approval first.
 
 ## Behaviour
 
@@ -164,17 +173,17 @@ Invariant: **no ticket with status Pending or In Progress has a date before toda
 ## Testing
 
 - Vitest unit tests for the domain logic: list ordering and renumbering, moves between lists, rollover (including order of rolled-over tickets and date changes), week calculation (Monday start, ISO week number, local dates), and the storage layer (atomic write, missing file, corrupt file).
-- Keep domain logic in plain TypeScript modules with no React or Electron imports, so it is testable without either.
+- Keep domain logic in plain TypeScript modules with no Angular or Electron imports, so it is testable without either and shared by both processes.
 
 ## Packaging
 
-- `npm start` runs the app in development.
+- `npm start` builds everything and runs the app. `npm run dev` runs it against the Angular dev server (with `ng serve` running) for live reload.
 - `npm run make` produces a Linux package (`.deb`, plus a zip) via Electron Forge. Windows and macOS makers are not configured in this iteration, but nothing in the code should prevent adding them.
 
 ## Left to the builder
 
 - Project layout and module boundaries (beyond keeping domain logic framework-free).
-- State management inside React (plain hooks/context are enough; no extra state library without approval).
+- State management inside Angular (a signal-based service is enough; no extra state library without approval).
 - IPC API shape (e.g. `load()` / `save(data)` vs. finer-grained operations).
 - Exact debounce interval, styling details within "plain", and component structure.
-- Lint/format tooling choice (needs approval if it adds dependencies), and updating `CLAUDE.md` with the build, test and lint commands once they exist.
+- Updating `CLAUDE.md` with the build, test and run commands once they exist.
