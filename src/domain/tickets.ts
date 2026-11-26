@@ -2,6 +2,7 @@ import type { Ticket } from '../shared/types';
 
 // Pure list operations. A "list" is one calendar date or the backlog (date === null).
 // Positions within a list are contiguous from 0 (0 = highest priority).
+// Within a list, open tickets come before completed ones; completed tickets can't be moved.
 // Functions never mutate their input and return the same array when nothing changes.
 
 type Patch = Partial<Pick<Ticket, 'title' | 'description' | 'status'>>;
@@ -67,9 +68,11 @@ export function deleteTicket(tickets: Ticket[], id: string): Ticket[] {
 
 export function moveTicket(tickets: Ticket[], id: string, toDate: string | null, toIndex: number, now: string): Ticket[] {
   const moving = tickets.find((t) => t.id === id);
-  if (!moving) return tickets;
-  const target = listOf(tickets, toDate).filter((t) => t.id !== id).map((t) => t.id);
-  const at = Math.max(0, Math.min(toIndex, target.length));
+  if (!moving || moving.status === 'completed') return tickets;
+  const others = listOf(tickets, toDate).filter((t) => t.id !== id);
+  const target = others.map((t) => t.id);
+  const openCount = others.filter((t) => t.status !== 'completed').length;
+  const at = Math.max(0, Math.min(toIndex, openCount));
   target.splice(at, 0, id);
 
   let next = tickets;
@@ -78,6 +81,20 @@ export function moveTicket(tickets: Ticket[], id: string, toDate: string | null,
     next = placeList(next, moving.date, source, new Set(), now);
   }
   return placeList(next, toDate, target, new Set([id]), now);
+}
+
+/** Order every list open-first, completed after, each group keeping its order. Stable, so a ticket
+ *  that just became completed lands at the top of the pile and a reopened one becomes the last open. */
+export function sinkCompleted(tickets: Ticket[]): Ticket[] {
+  const dates = new Set(tickets.map((t) => t.date));
+  let next = tickets;
+  for (const date of dates) {
+    const ordered = listOf(tickets, date).sort(
+      (p, q) => Number(p.status === 'completed') - Number(q.status === 'completed') || p.position - q.position,
+    );
+    next = placeList(next, date, ordered.map((t) => t.id), new Set(), '');
+  }
+  return next;
 }
 
 export function renumberAll(tickets: Ticket[]): Ticket[] {
