@@ -1,5 +1,5 @@
 import { CdkDrag, CdkDragDrop, CdkDragPlaceholder, CdkDropList } from '@angular/cdk/drag-drop';
-import { Component, inject, input, output } from '@angular/core';
+import { Component, computed, inject, input, output } from '@angular/core';
 import { canDropInto } from '../domain/drop';
 import type { Ticket } from '../shared/types';
 import { AddTicket } from './add-ticket';
@@ -22,20 +22,24 @@ const CLICK_AFTER_DRAG_MS = 150;
         [cdkDropListData]="date()"
         [cdkDropListEnterPredicate]="acceptsDrop"
         [cdkDropListSortingDisabled]="isPast()"
-        [cdkDropListSortPredicate]="sortAbovePile"
         (cdkDropListDropped)="dropped.emit($event)"
       >
-        @for (t of tickets(); track t.id) {
+        <!-- Only open tickets are drag items, so CDK's indexes match the domain's. Completed cards
+             are plain children with CSS order: 1, so a placeholder CDK appends at the end of the
+             list still shows above the pile. -->
+        @for (t of openTickets(); track t.id) {
           <app-ticket-card
             cdkDrag
             [cdkDragData]="t.id"
-            [cdkDragDisabled]="t.status === 'completed'"
             [ticket]="t"
             (cdkDragEnded)="lastDragEnd = now()"
             (open)="onOpen(t.id)"
           >
             <div *cdkDragPlaceholder class="card-placeholder"></div>
           </app-ticket-card>
+        }
+        @for (t of completedTickets(); track t.id) {
+          <app-ticket-card class="is-locked" [ticket]="t" (open)="onOpen(t.id)" />
         }
       </div>
       @if (!isPast()) {
@@ -53,20 +57,16 @@ export class TicketList {
   readonly open = output<string>();
   readonly dropped = output<CdkDragDrop<string | null>>();
 
+  /** The store keeps completed tickets last, so these two are the list split at the pile. */
+  protected readonly openTickets = computed(() => this.tickets().filter((t) => t.status !== 'completed'));
+  protected readonly completedTickets = computed(() => this.tickets().filter((t) => t.status === 'completed'));
+
   private readonly store = inject(TasksStore);
   protected lastDragEnd = 0;
   protected readonly now = Date.now;
 
   /** Refuses both the empty area and the cards of a past day. */
   protected readonly acceptsDrop = (): boolean => canDropInto(this.date(), this.store.today());
-
-  /** The drag placeholder may not go below the last open ticket. */
-  protected readonly sortAbovePile = (index: number, drag: CdkDrag): boolean => {
-    const list = this.tickets();
-    const openCount = list.filter((t) => t.status !== 'completed').length;
-    const fromHere = list.some((t) => t.id === drag.data);
-    return index <= openCount - (fromHere ? 1 : 0);
-  };
 
   protected onOpen(id: string): void {
     if (Date.now() - this.lastDragEnd < CLICK_AFTER_DRAG_MS) return;

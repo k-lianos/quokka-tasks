@@ -144,7 +144,7 @@ All dates are **local** calendar dates (the computer's timezone), never UTC date
 - Drag a card within a list to reorder it.
 - Drag a card to another day (in the visible week) or to/from the backlog to move it; it lands where it is dropped.
 - Moving a ticket between weeks is done by dropping it in the backlog, navigating, and dragging it out again. (No cross-week drag in this iteration.)
-- **Past days** (dates before today) are not drop targets. Their tickets can still be dragged out (to today, a future day or the backlog).
+- **Past days** (dates before today) are not drop targets. Rollover leaves only completed tickets there, and those are locked (see below).
 - Completed tickets can't be dragged; set the status back first. Open tickets dropped at or below the completed pile land just above it.
 
 ### Rollover

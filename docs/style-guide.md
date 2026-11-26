@@ -90,7 +90,7 @@ Checked contrast (AA): muted on surface 6.3, muted on raised 5.8, danger on surf
 | Segmented pill | `.pill`, `.pill-button`, `.pill-button.is-primary` | Raised-surface track; one primary (cyan) button max. |
 | Day column | `.list`, `.list-heading`, `.list.is-today`, `.list.is-past` | Surface panel. Today = 2px inset cyan outline + cyan heading. Past = hollow (transparent with a 1px border), cards on `--color-surface`, titles muted. Never dim with `opacity`: it breaks AA contrast. |
 | Backlog (glass) | `.backlog .list` | Royal-blue gradient + blue inner edge; cards translucent white; muted text uses `--color-glass-text-muted`. |
-| Card | `.card`, `.card-priority`, `.card-title`, `.card-status`, `.status-dot` | Raised surface, one-line title with ellipsis. Dot: muted = to do, cyan = in progress, green = done. Completed cards are drag-disabled (`cdk-drag-disabled`) but keep the pointer cursor; they still open on click. |
+| Card | `.card`, `.card-priority`, `.card-title`, `.card-status`, `.status-dot` | Raised surface, one-line title with ellipsis. Dot: muted = to do, cyan = in progress, green = done. Completed cards (`.is-locked`) aren't drag items; `order: 1` keeps them below any drag placeholder. They keep the pointer cursor and still open on click. |
 | Add | `.add-button`, `.add-input` | Quiet muted text, cyan on hover; input styled like fields. |
 | Buttons | `.button`, `.button-danger`, `.icon-button` | Quiet raised button; danger = red text on 15% red; icon button = 30px square, transparent. |
 | Fields | `.field`, `.field input/select/textarea`, `.field-error` | Label above, small heavy muted; borderless raised inputs; focus ring on focus. |

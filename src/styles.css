@@ -228,6 +228,8 @@ app-ticket-list { display: block; min-height: 0; }
   flex-direction: column;
   gap: var(--space-2);
 }
+/* Completed cards aren't drag items; order keeps them below any drag placeholder. */
+.cards .is-locked { order: 1; }
 
 
 /* Card */
