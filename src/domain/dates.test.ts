@@ -4,7 +4,6 @@ import {
   formatDayHeader,
   formatLongDate,
   formatWeekHeading,
-  formatWeekLabel,
   isoWeekNumber,
   nextViewedWeek,
   startOfWeek,
@@ -46,12 +45,6 @@ describe('weeks', () => {
 });
 
 describe('labels', () => {
-  test('formatWeekLabel handles same-month, cross-month and cross-year weeks', () => {
-    expect(formatWeekLabel('2026-11-23')).toBe('Week 48 · 23–29 Nov 2026');
-    expect(formatWeekLabel('2026-11-30')).toBe('Week 49 · 30 Nov – 6 Dec 2026');
-    expect(formatWeekLabel('2026-12-28')).toBe('Week 53 · 28 Dec 2026 – 3 Jan 2027');
-  });
-
   test('formatWeekHeading splits week number/year from the date range', () => {
     expect(formatWeekHeading('2026-11-23')).toEqual({ eyebrow: 'Week 48 · 2026', range: '23 – 29 November' });
     expect(formatWeekHeading('2026-11-30')).toEqual({ eyebrow: 'Week 49 · 2026', range: '30 November – 6 December' });

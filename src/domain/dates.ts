@@ -46,22 +46,6 @@ export function isoWeekNumber(date: string): number {
   return Math.floor(dayOfYear / 7) + 1;
 }
 
-export function formatWeekLabel(weekStart: string): string {
-  const start = parse(weekStart);
-  const end = parse(addDays(weekStart, 6));
-  const week = `Week ${isoWeekNumber(weekStart)}`;
-  const endText = `${end.getDate()} ${MONTHS[end.getMonth()]} ${end.getFullYear()}`;
-  let range: string;
-  if (start.getFullYear() !== end.getFullYear()) {
-    range = `${start.getDate()} ${MONTHS[start.getMonth()]} ${start.getFullYear()} – ${endText}`;
-  } else if (start.getMonth() !== end.getMonth()) {
-    range = `${start.getDate()} ${MONTHS[start.getMonth()]} – ${endText}`;
-  } else {
-    range = `${start.getDate()}–${endText}`;
-  }
-  return `${week} · ${range}`;
-}
-
 export interface WeekHeading {
   /** e.g. 'Week 48 · 2026' — the year is the ISO-week year (year of its Thursday). */
   eyebrow: string;

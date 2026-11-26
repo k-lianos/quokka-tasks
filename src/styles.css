@@ -93,9 +93,64 @@ button { cursor: pointer; }
 .banner-error { background: #fde2e1; border-color: #e5a3a0; }
 .banner button { border: none; background: none; }
 
-/* Week header */
-.week-header { display: flex; align-items: center; gap: 8px; }
-.week-label { font-size: 16px; margin: 0 8px; min-width: 260px; text-align: center; }
+/* Week header: brand lockup | eyebrow + big range | ‹ Today › pill */
+.week-header { display: flex; align-items: center; gap: var(--space-5); padding: var(--space-1) var(--space-1) 0; }
+
+.brand { display: flex; align-items: center; gap: 9px; flex: none; }
+.brand-mark { width: 30px; height: 30px; color: var(--color-accent); }
+.brand-word { font-size: 22px; font-weight: var(--font-weight-heavy); letter-spacing: var(--tracking-tight); }
+
+.week-title {
+  display: flex;
+  flex-direction: column;
+  margin-right: auto;
+  min-width: 0;
+  padding-left: var(--space-5);
+  border-left: 1px solid var(--color-border);
+}
+.week-eyebrow {
+  font-size: 11px;
+  font-weight: var(--font-weight-heavy);
+  letter-spacing: var(--tracking-caps);
+  text-transform: uppercase;
+  color: var(--color-accent);
+}
+.week-range {
+  margin: 0;
+  font-size: var(--font-size-display);
+  font-weight: var(--font-weight-heavy);
+  letter-spacing: var(--tracking-tight);
+  line-height: 1.1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.pill {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  flex: none;
+  padding: 3px;
+  border-radius: var(--radius-pill-outer);
+  background: var(--color-surface-raised);
+}
+.pill-button {
+  display: grid;
+  place-items: center;
+  height: 30px;
+  min-width: 32px;
+  padding: 0 var(--space-3);
+  border: none;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  font-weight: 600;
+  transition: background var(--transition-fast);
+}
+.pill-button:hover { background: var(--color-accent-tint); }
+.pill-button.is-primary { background: var(--color-accent); color: var(--color-on-accent); }
+
+.icon { width: 16px; height: 16px; }
 
 /* Board: 7 day columns + backlog */
 .board { flex: 1; min-height: 0; display: flex; gap: 8px; }
