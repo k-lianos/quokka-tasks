@@ -1,5 +1,6 @@
 import { CdkDrag, CdkDragDrop, CdkDragPlaceholder, CdkDropList } from '@angular/cdk/drag-drop';
 import { Component, computed, inject, input, output } from '@angular/core';
+import { RouterLink } from '@angular/router';
 import { canDropInto } from '../domain/drop';
 import type { Ticket } from '../shared/types';
 import { AddTicket } from './add-ticket';
@@ -12,10 +13,16 @@ const CLICK_AFTER_DRAG_MS = 150;
 /** One list of tickets: a day column or the backlog. Also a drop target for drag and drop. */
 @Component({
   selector: 'app-ticket-list',
-  imports: [TicketCard, AddTicket, CdkDropList, CdkDrag, CdkDragPlaceholder],
+  imports: [TicketCard, AddTicket, CdkDropList, CdkDrag, CdkDragPlaceholder, RouterLink],
   template: `
     <section class="list" [class.is-today]="isToday()" [class.is-past]="isPast()">
-      <header class="list-heading">{{ heading() }}</header>
+      <header class="list-heading">
+        @if (headingLink(); as link) {
+          <a class="list-heading-link" [routerLink]="link">{{ heading() }}</a>
+        } @else {
+          {{ heading() }}
+        }
+      </header>
       <div
         class="cards"
         cdkDropList
@@ -50,6 +57,8 @@ const CLICK_AFTER_DRAG_MS = 150;
 })
 export class TicketList {
   readonly heading = input.required<string>();
+  /** When set, the heading is a link to this route (the week view links each day to its Day view). */
+  readonly headingLink = input<string | null>(null);
   readonly date = input.required<string | null>();
   readonly tickets = input.required<Ticket[]>();
   readonly isToday = input(false);

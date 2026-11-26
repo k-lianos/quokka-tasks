@@ -7,6 +7,7 @@ const MONTHS_LONG = [
   'July', 'August', 'September', 'October', 'November', 'December',
 ];
 const WEEKDAYS =['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+const WEEKDAYS_LONG = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 
 const pad = (n: number): string => String(n).padStart(2, '0');
 
@@ -17,6 +18,11 @@ function parse(date: string): Date {
 
 export function toLocalDate(d: Date): string {
   return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+}
+
+/** True for a real calendar date written as 'YYYY-MM-DD' (e.g. rejects '2026-02-30'). */
+export function isValidDate(s: string): boolean {
+  return /^\d{4}-\d{2}-\d{2}$/.test(s) && addDays(s, 0) === s;
 }
 
 export function todayLocal(): string {
@@ -82,4 +88,20 @@ export function formatLongDate(date: string): string {
 /** After the local date changes, keep following "this week" only if the user was looking at it. */
 export function nextViewedWeek(viewedWeekStart: string, oldToday: string, newToday: string): string {
   return viewedWeekStart === startOfWeek(oldToday) ? startOfWeek(newToday) : viewedWeekStart;
+}
+
+export interface DayHeading {
+  /** e.g. 'Thursday · Week 48'. */
+  eyebrow: string;
+  /** e.g. '26 November'; the year is added when it isn't today's year. */
+  title: string;
+}
+
+export function formatDayHeading(date: string, today: string): DayHeading {
+  const d = parse(date);
+  const year = d.getFullYear() === parse(today).getFullYear() ? '' : ` ${d.getFullYear()}`;
+  return {
+    eyebrow: `${WEEKDAYS_LONG[d.getDay()]} · Week ${isoWeekNumber(date)}`,
+    title: `${d.getDate()} ${MONTHS_LONG[d.getMonth()]}${year}`,
+  };
 }
