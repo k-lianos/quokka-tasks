@@ -17,7 +17,7 @@ const DEBOUNCE_MS = 400;
       <div class="dialog focus-view" role="dialog" aria-modal="true" aria-label="Ticket">
         <div class="focus-header">
           <span class="focus-date">{{ dateLabel() }}</span>
-          <button type="button" class="focus-close" (click)="close()" aria-label="Close">✕</button>
+          <button type="button" class="icon-button" (click)="close()" aria-label="Close"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" /></svg></button>
         </div>
 
         <label class="field">
@@ -43,7 +43,7 @@ const DEBOUNCE_MS = 400;
         </label>
 
         <div class="dialog-actions">
-          <button type="button" class="danger" (click)="confirming.set(true)">Delete</button>
+          <button type="button" class="button button-danger" (click)="confirming.set(true)">Delete</button>
         </div>
       </div>
     </div>
