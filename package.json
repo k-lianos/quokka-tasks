@@ -37,5 +37,8 @@
   "productName": "Quokka Tasks",
   "description": "Personal offline weekly tasks app",
   "author": "Konstantinos Lianos",
-  "main": "dist/electron/electron/main.js"
+  "main": "dist/electron/electron/main.js",
+  "volta": {
+    "node": "24.22.3"
+  }
 }
