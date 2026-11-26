@@ -70,7 +70,8 @@ app-root {
   display: flex;
   flex-direction: column;
   height: 100%;
-  padding: var(--space-4);
+  --app-padding: var(--space-4); /* read by .title-bar to reach the window edge */
+  padding: var(--app-padding);
   gap: var(--space-3);
 }
 
@@ -178,6 +179,20 @@ button { cursor: pointer; }
 .pill-button.is-primary { background: var(--color-accent); color: var(--color-on-accent); }
 
 .icon { width: 16px; height: 16px; }
+
+/* Title bar: the window is frameless, so the header (or, while loading, a bare strip)
+   is the drag handle. It bleeds into app-root's padding to reach the top window edge. */
+.title-bar {
+  -webkit-app-region: drag;
+  margin: calc(-1 * var(--app-padding)) calc(-1 * var(--app-padding)) 0;
+  padding: calc(var(--app-padding) + var(--space-1)) calc(var(--app-padding) + var(--space-1)) 0;
+}
+.title-bar button { -webkit-app-region: no-drag; }
+.title-strip { display: flex; justify-content: flex-end; }
+
+/* Window controls: minimise, maximise/restore, close */
+.window-controls { display: flex; gap: 2px; flex: none; }
+.window-control-close:hover { background: color-mix(in srgb, var(--color-danger) 15%, transparent); color: var(--color-danger); }
 
 /* Board: 7 day columns + backlog */
 .board { flex: 1; min-height: 0; display: flex; gap: var(--space-3); }
@@ -290,6 +305,7 @@ app-ticket-list { display: block; min-height: 0; }
   align-items: center;
   justify-content: center;
   z-index: 10;
+  -webkit-app-region: no-drag; /* drag regions ignore stacking: keep the header under a dialog clickable */
 }
 .dialog {
   padding: var(--space-5);
@@ -346,7 +362,7 @@ app-ticket-card { display: block; }
 
 /* Narrow windows (down to the 900px minWidth): tighter spacing so day columns keep room for cards */
 @media (max-width: 1200px) {
-  app-root { padding: var(--space-3); }
+  app-root { --app-padding: var(--space-3); }
   .board, .week { gap: var(--space-2); }
   .board > .backlog { width: 200px; }
   .list { padding: var(--space-2); }
