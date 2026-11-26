@@ -92,14 +92,14 @@ export function sinkCompleted(tickets: Ticket[]): Ticket[] {
     if (list) list.push(t);
     else lists.set(t.date, [t]);
   }
-  let next = tickets;
-  for (const [date, list] of lists) {
-    const ordered = list.sort(
-      (p, q) => Number(p.status === 'completed') - Number(q.status === 'completed') || p.position - q.position,
-    );
-    next = placeList(next, date, ordered.map((t) => t.id), new Set(), '');
+  const position = new Map<string, number>();
+  for (const list of lists.values()) {
+    list
+      .sort((p, q) => Number(p.status === 'completed') - Number(q.status === 'completed') || p.position - q.position)
+      .forEach((t, i) => position.set(t.id, i));
   }
-  return next;
+  if (tickets.every((t) => t.position === position.get(t.id))) return tickets;
+  return tickets.map((t) => (t.position === position.get(t.id) ? t : { ...t, position: position.get(t.id)! }));
 }
 
 export function renumberAll(tickets: Ticket[]): Ticket[] {
