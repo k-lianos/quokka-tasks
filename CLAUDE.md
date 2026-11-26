@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project
 
-Quokka Tasks: a personal, offline desktop tasks app (week view + backlog). Design: `docs/superpowers/specs/2026-11-26-tasks-app-design.md`.
+Quokka Tasks: a personal, offline desktop tasks app (Day view as the start screen + week view + backlog). Design: `docs/superpowers/specs/2026-11-26-tasks-app-design.md`.
 
 Stack: Electron (main process in `electron/`, compiled with `tsc`), Angular 22 UI in `src/app/` (standalone components, signals, zoneless) with `@angular/cdk` drag-drop, TypeScript, Vitest, Electron Forge for packaging only, npm (public registry via the project `.npmrc`).
 
@@ -23,6 +23,7 @@ Stack: Electron (main process in `electron/`, compiled with `tsc`), Angular 22 U
 - `src/domain/` and `src/shared/` import nothing from Angular, Electron, Node or the DOM. They are compiled by both builds and hold all business rules, which are unit-tested.
 - All dependencies are devDependencies (the UI is bundled; the main process uses only Node built-ins).
 - All styles live in `src/styles.css`.
+- Routing uses hash URLs (`withHashLocation`, e.g. `#/day/2026-11-26`) because Electron loads the UI from `file://`; keep it that way.
 - UI follows `docs/style-guide.md`: use the design tokens in `src/styles.css`, no raw colours in rules.
 
 ## Workflow
