@@ -18,7 +18,7 @@ Stack: Electron (main process in `electron/`, compiled with `tsc`), Angular 22 U
 - `npm run make` — build and package (`.deb` + zip in `out/make/`).
 - `npm run format` — format everything with Prettier. A husky pre-commit hook runs lint-staged, which formats staged files with Prettier automatically.
 - `npm run format:check` — check formatting without writing (CI runs this).
-- CI (`.github/workflows/ci.yml`) runs `format:check`, `npm test` and `npm run build` on PRs and pushes to `main`. Pushing a `v*` tag that matches `package.json` `version` runs `release.yml`, which publishes the `.deb` + zip as a GitHub Release.
+- CI (`.github/workflows/ci.yml`) runs `format:check`, `npm test` and `npm run build` on PRs and pushes to `main`. Releasing (version bump PR, `v*` tag, `release.yml` publishes the `.deb` + zip): follow `docs/releasing.md`; the user-invoked `/release` skill runs it end to end.
 - Standard verification: `npm test && npm run build`. There is no linter yet; strict TypeScript and Angular strict templates are the static check.
 
 ## Code rules
