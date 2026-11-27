@@ -1,0 +1,23 @@
+# Add files here to ignore them from prettier formatting
+
+# Build output
+/dist
+/out
+/out-tsc
+/bazel-out
+/.angular
+/coverage
+/tmp
+
+# Dependencies and tooling
+/node_modules
+/.husky
+/.git
+/.superpowers
+
+# Editors
+/.idea
+/.vscode
+
+# Generated
+package-lock.json
