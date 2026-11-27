@@ -106,6 +106,7 @@ Checked contrast (AA): muted on surface 6.3, muted on raised 5.8, danger on surf
 - The **Q mark** is an inline SVG path (viewBox `0 0 32 32`) in `src/app/week-header.ts`; cyan via `currentColor`.
 - The **app icon** source is `assets-src/icon.svg` (cyan Q on a navy rounded square). Exported files: `public/icon.png` (512px; Electron window and `.deb`) and `public/favicon.ico`. Re-export commands are in the SVG's comment (Inkscape + ImageMagick).
 - The **macOS icon** is `assets-src/icon-macos.svg` (the same tile on Apple's 1024px grid, with a transparent margin) exported to `packaging/icon.icns` by `node assets-src/make-icns.mjs`.
+- The **Windows icon** is `packaging/icon.ico` (`.exe` and taskbar), exported from `assets-src/icon.svg` (commands in its comment).
 
 ## Adding a component: checklist
 
