@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024">
+  <!-- macOS app icon: icon.svg scaled onto Apple's 1024px grid (824px tile, 100px transparent margin),
+       so it matches the size of other Dock icons.
+       Export: node assets-src/make-icns.mjs (needs Inkscape) → packaging/icon.icns -->
+  <g transform="translate(100 100) scale(1.609375)">
+    <rect width="512" height="512" rx="115" fill="#070b12"/>
+    <g transform="translate(79 79.6) scale(10.5)">
+      <path d="M16 3a13 13 0 1 0 6.9 24l3.6 3.6 4.2-4.2-3.4-3.4A13 13 0 0 0 16 3zm0 7a6 6 0 1 1 0 12 6 6 0 0 1 0-12z" fill="#00e1f0"/>
+    </g>
+  </g>
+</svg>

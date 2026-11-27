@@ -29,6 +29,7 @@ const api: TasksApi = {
             ipcRenderer.send(IPC.flushDone);
         });
     },
+    platform: process.platform,
     window: {
         minimize: () => ipcRenderer.send(IPC.windowMinimize),
         toggleMaximize: () => ipcRenderer.send(IPC.windowToggleMaximize),

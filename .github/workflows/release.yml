@@ -1,7 +1,8 @@
 name: Release
 
-# Push a tag like v0.2.0 (matching package.json "version") to build the
-# .deb and .zip and publish them as a GitHub Release.
+# Push a tag like v0.2.0 (matching package.json "version") to build the Linux
+# .deb + .zip and the macOS .zip files (Apple Silicon and Intel) and publish
+# them as a GitHub Release.
 on:
     push:
         tags: ['v*']
@@ -10,15 +11,10 @@ permissions:
     contents: write
 
 jobs:
-    release:
+    check-tag:
         runs-on: ubuntu-latest
         steps:
             - uses: actions/checkout@v4
-
-            - uses: actions/setup-node@v4
-              with:
-                  node-version-file: package.json # reads volta.node
-                  cache: npm
 
             - name: Check the tag matches package.json
               run: |
@@ -28,6 +24,17 @@ jobs:
                       exit 1
                   fi
 
+    linux:
+        needs: check-tag
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v4
+
+            - uses: actions/setup-node@v4
+              with:
+                  node-version-file: package.json # reads volta.node
+                  cache: npm
+
             - name: Install packaging tools
               run: sudo apt-get update && sudo apt-get install -y fakeroot dpkg
 
@@ -35,9 +42,48 @@ jobs:
             - run: npm test
             - run: npm run make
 
+            - uses: actions/upload-artifact@v4
+              with:
+                  name: linux
+                  path: |
+                      out/make/**/*.deb
+                      out/make/**/*.zip
+                  if-no-files-found: error
+
+    macos:
+        needs: check-tag
+        runs-on: macos-latest # Apple Silicon; the Intel build is cross-packaged (no native modules)
+        steps:
+            - uses: actions/checkout@v4
+
+            - uses: actions/setup-node@v4
+              with:
+                  node-version-file: package.json # reads volta.node
+                  cache: npm
+
+            - run: npm ci
+            - run: npm test
+            - run: npm run build
+            - run: npx electron-forge make --arch=arm64,x64
+
+            - uses: actions/upload-artifact@v4
+              with:
+                  name: macos
+                  path: out/make/**/*.zip
+                  if-no-files-found: error
+
+    publish:
+        needs: [linux, macos]
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/download-artifact@v4
+              with:
+                  path: dist
+
             - name: Publish the release
               env:
                   GH_TOKEN: ${{ github.token }}
               run: |
                   shopt -s globstar
-                  gh release create "$GITHUB_REF_NAME" out/make/**/*.deb out/make/**/*.zip --generate-notes
+                  gh release create "$GITHUB_REF_NAME" dist/**/*.deb dist/**/*.zip \
+                      --repo "$GITHUB_REPOSITORY" --generate-notes

@@ -12,8 +12,10 @@ export interface TasksApi {
     save(data: DataFile): Promise<void>;
     /** The main process asks the UI to flush pending edits before the window closes. */
     onFlushRequest(handler: () => Promise<void>): void;
-    /** Controls for the frameless window: the UI draws its own title bar buttons. */
+    /** Controls for the frameless window: the UI draws its own title bar buttons (except on macOS, see main.ts). */
     window: WindowApi;
+    /** The operating system, as Node's process.platform: 'linux', 'darwin' (macOS) or 'win32'. */
+    platform: string;
 }
 
 export interface WindowApi {
