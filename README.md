@@ -55,6 +55,20 @@ npm run make       # .deb and .zip in out/make/
 
 Install the package with `sudo apt install ./out/make/deb/x64/quokka-tasks_*_amd64.deb`.
 
+## CI and releases
+
+GitHub Actions runs `format:check`, the tests and the build on every pull request and on
+pushes to `main` (`.github/workflows/ci.yml`). `main` requires that check to pass.
+
+To release, bump `version` in `package.json`, merge it, then tag and push:
+
+```bash
+git tag v0.2.0 && git push origin v0.2.0
+```
+
+`.github/workflows/release.yml` checks the tag matches `package.json`, runs `npm run make`
+and attaches the `.deb` and `.zip` to a GitHub Release.
+
 ## Your data
 
 All tickets are in one file:
