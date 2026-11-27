@@ -41,19 +41,19 @@ Sync, accounts or multiple users; recurring tickets; tags, labels or colours per
 
 ## Approaches considered
 
-| Approach | Trade-off | Verdict |
-|---|---|---|
-| **Electron** | Bundles Chromium + Node: ~100 MB install, ~150 MB RAM. All JS; identical rendering and drag-and-drop on every OS; most mature ecosystem. | **Chosen** |
-| Tauri | Uses the OS's own webview: ~5–10 MB, light on memory. Needs the Rust toolchain; each OS has a different web engine (WebKitGTK on Linux is the quirkiest), so drag-and-drop and CSS can differ per OS. | Rejected: cross-OS consistency and staying all-JS matter more than size for one user. |
-| Local web server + browser | Not a native app; the user would have to start a server. | Rejected |
-| Flutter / non-JS native | Leaves the language the user is comfortable with. | Rejected |
+| Approach                   | Trade-off                                                                                                                                                                                             | Verdict                                                                               |
+| -------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------- |
+| **Electron**               | Bundles Chromium + Node: ~100 MB install, ~150 MB RAM. All JS; identical rendering and drag-and-drop on every OS; most mature ecosystem.                                                              | **Chosen**                                                                            |
+| Tauri                      | Uses the OS's own webview: ~5–10 MB, light on memory. Needs the Rust toolchain; each OS has a different web engine (WebKitGTK on Linux is the quirkiest), so drag-and-drop and CSS can differ per OS. | Rejected: cross-OS consistency and staying all-JS matter more than size for one user. |
+| Local web server + browser | Not a native app; the user would have to start a server.                                                                                                                                              | Rejected                                                                              |
+| Flutter / non-JS native    | Leaves the language the user is comfortable with.                                                                                                                                                     | Rejected                                                                              |
 
 UI framework (within Electron):
 
-| Option | Trade-off | Verdict |
-|---|---|---|
-| React + dnd-kit + Forge's Vite template | Smallest, one build tool for everything. | Initially picked, then replaced |
-| **Angular + CDK drag-drop** | Two build tools (Angular CLI for UI, `tsc` + Forge for the shell); more boilerplate. First-party drag-drop built for connected lists; the user knows Angular better. | **Chosen** |
+| Option                                  | Trade-off                                                                                                                                                            | Verdict                         |
+| --------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------- |
+| React + dnd-kit + Forge's Vite template | Smallest, one build tool for everything.                                                                                                                             | Initially picked, then replaced |
+| **Angular + CDK drag-drop**             | Two build tools (Angular CLI for UI, `tsc` + Forge for the shell); more boilerplate. First-party drag-drop built for connected lists; the user knows Angular better. | **Chosen**                      |
 
 ## Stack (decided)
 
@@ -77,19 +77,19 @@ Approved packages: `@angular/core`, `@angular/common`, `@angular/compiler`, `@an
 type Status = 'pending' | 'in_progress' | 'completed';
 
 interface Ticket {
-  id: string;            // crypto.randomUUID()
-  title: string;         // required, trimmed, non-empty
-  description: string;   // plain text, may be empty
-  status: Status;
-  date: string | null;   // local calendar date 'YYYY-MM-DD'; null = backlog
-  position: number;      // 0-based index within its list (its day, or the backlog)
-  createdAt: string;     // ISO timestamp
-  updatedAt: string;     // ISO timestamp
+    id: string; // crypto.randomUUID()
+    title: string; // required, trimmed, non-empty
+    description: string; // plain text, may be empty
+    status: Status;
+    date: string | null; // local calendar date 'YYYY-MM-DD'; null = backlog
+    position: number; // 0-based index within its list (its day, or the backlog)
+    createdAt: string; // ISO timestamp
+    updatedAt: string; // ISO timestamp
 }
 
 interface DataFile {
-  version: 1;
-  tickets: Ticket[];
+    version: 1;
+    tickets: Ticket[];
 }
 ```
 
@@ -117,7 +117,7 @@ All dates are **local** calendar dates (the computer's timezone), never UTC date
 ### Backlog
 
 - An ordered list of tickets with `date = null`, with its own **+ add**.
-- Displayed as a panel beside the week (sketch above), so tickets can be dragged between it and the days. *(Designer's call: drag and drop between backlog and days needs both on screen at once, so the backlog is a panel rather than a separate page.)*
+- Displayed as a panel beside the week (sketch above), so tickets can be dragged between it and the days. _(Designer's call: drag and drop between backlog and days needs both on screen at once, so the backlog is a panel rather than a separate page.)_
 
 ### Cards
 
@@ -154,7 +154,7 @@ Invariant: **no ticket with status Pending or In Progress has a date before toda
 - Enforced on app start, when the local date changes while the app is running (checked at least every minute and when the window regains focus), and after any change to the data (e.g. a past Completed ticket set back to Pending).
 - Offending tickets move to today and are placed at the **top** of today's list, ahead of tickets already there. Among themselves they keep their order: earlier original date first, then original position.
 - Completed tickets stay on their original day, at the bottom of it, as a record.
-- *(Designer's call)* If the date changes while the app is open and the user is viewing the week that contained the old "today", the view follows to the week containing the new today. If they're viewing some other week, the view stays put.
+- _(Designer's call)_ If the date changes while the app is open and the user is viewing the week that contained the old "today", the view follows to the week containing the new today. If they're viewing some other week, the view stays put.
 
 ### Storage
 
@@ -163,10 +163,10 @@ Invariant: **no ticket with status Pending or In Progress has a date before toda
 - Missing file on start: begin with an empty `DataFile`.
 - Unreadable or invalid file on start: rename it to `tasks.corrupt-<timestamp>.json`, start empty, and show a one-line notice naming the backup. Never overwrite the unreadable file.
 - The `version` field allows future migrations.
-- **Validation on load** *(designer's call)*: the file must parse as JSON with `version: 1` and every ticket must have the fields and types above. Anything else is treated as unreadable (backup + start empty, as above). The one repair allowed: positions are renumbered per list on load, since gaps or duplicates there are harmless to fix.
-- **Save failure** *(designer's call)*: keep the in-memory data, show a persistent error banner ("Couldn't save — your latest changes are not on disk"), and retry on the next change. Clear the banner on the next successful save.
-- **Quitting** *(designer's call)*: pending edits are flushed and written before the app exits.
-- **Single instance** *(designer's call)*: only one copy of the app may run (Electron's single-instance lock); launching again focuses the existing window. This prevents two processes writing the same file.
+- **Validation on load** _(designer's call)_: the file must parse as JSON with `version: 1` and every ticket must have the fields and types above. Anything else is treated as unreadable (backup + start empty, as above). The one repair allowed: positions are renumbered per list on load, since gaps or duplicates there are harmless to fix.
+- **Save failure** _(designer's call)_: keep the in-memory data, show a persistent error banner ("Couldn't save — your latest changes are not on disk"), and retry on the next change. Clear the banner on the next successful save.
+- **Quitting** _(designer's call)_: pending edits are flushed and written before the app exits.
+- **Single instance** _(designer's call)_: only one copy of the app may run (Electron's single-instance lock); launching again focuses the existing window. This prevents two processes writing the same file.
 
 ### Security / offline
 

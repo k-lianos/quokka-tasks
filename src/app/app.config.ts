@@ -3,9 +3,9 @@ import { provideRouter, withComponentInputBinding, withHashLocation } from '@ang
 import { routes } from './app.routes';
 
 export const appConfig: ApplicationConfig = {
-  providers: [
-    provideBrowserGlobalErrorListeners(),
-    // Hash URLs: Electron loads the UI from file://, where path URLs break on reload.
-    provideRouter(routes, withHashLocation(), withComponentInputBinding()),
-  ],
+    providers: [
+        provideBrowserGlobalErrorListeners(),
+        // Hash URLs: Electron loads the UI from file://, where path URLs break on reload.
+        provideRouter(routes, withHashLocation(), withComponentInputBinding()),
+    ],
 };

@@ -34,27 +34,29 @@
 ### Task 1: Week heading function
 
 **Files:**
+
 - Modify: `src/domain/dates.ts`
 - Test: `src/domain/dates.test.ts`
 
 **Interfaces:**
+
 - Produces: `export interface WeekHeading { eyebrow: string; range: string }` and `export function formatWeekHeading(weekStart: string): WeekHeading` in `src/domain/dates.ts`.
 
 - [ ] **Step 1: Write the failing test** in the `weeks` describe block:
 
 ```ts
 test('formatWeekHeading splits week number/year from the date range', () => {
-  expect(formatWeekHeading('2026-11-23')).toEqual({ eyebrow: 'Week 48 · 2026', range: '23 – 29 November' });
-  expect(formatWeekHeading('2026-11-30')).toEqual({ eyebrow: 'Week 49 · 2026', range: '30 November – 6 December' });
-  expect(formatWeekHeading('2026-12-28')).toEqual({ eyebrow: 'Week 53 · 2026', range: '28 December 2026 – 3 January 2027' });
-  // ISO week 1 of 2026 starts in December 2025: the eyebrow uses the ISO-week year.
-  expect(formatWeekHeading('2025-12-29')).toEqual({ eyebrow: 'Week 1 · 2026', range: '29 December 2025 – 4 January 2026' });
+    expect(formatWeekHeading('2026-11-23')).toEqual({ eyebrow: 'Week 48 · 2026', range: '23 – 29 November' });
+    expect(formatWeekHeading('2026-11-30')).toEqual({ eyebrow: 'Week 49 · 2026', range: '30 November – 6 December' });
+    expect(formatWeekHeading('2026-12-28')).toEqual({ eyebrow: 'Week 53 · 2026', range: '28 December 2026 – 3 January 2027' });
+    // ISO week 1 of 2026 starts in December 2025: the eyebrow uses the ISO-week year.
+    expect(formatWeekHeading('2025-12-29')).toEqual({ eyebrow: 'Week 1 · 2026', range: '29 December 2025 – 4 January 2026' });
 });
 ```
 
 - [ ] **Step 2: Run** `npx vitest run src/domain/dates.test.ts` — Expected: FAIL, `formatWeekHeading` is not exported.
 
-- [ ] **Step 3: Implement `formatWeekHeading`.** Add a `MONTHS_LONG` array of full month names. ISO-week year = `getFullYear()` of `addDays(weekStart, 3)` (the Thursday). Range rules: same month `D – D Month`; different month same year `D Month – D Month`; different year `D Month YYYY – D Month YYYY`. Use spaced en dash ` – ` everywhere. Leave `formatWeekLabel` in place (Task 3 removes it).
+- [ ] **Step 3: Implement `formatWeekHeading`.** Add a `MONTHS_LONG` array of full month names. ISO-week year = `getFullYear()` of `addDays(weekStart, 3)` (the Thursday). Range rules: same month `D – D Month`; different month same year `D Month – D Month`; different year `D Month YYYY – D Month YYYY`. Use spaced en dash `–` everywhere. Leave `formatWeekLabel` in place (Task 3 removes it).
 
 - [ ] **Step 4: Run** `npx vitest run src/domain/dates.test.ts` — Expected: PASS.
 
@@ -70,17 +72,19 @@ git commit -m "feat: add week heading formatter for the new header"
 ### Task 2: Tokens, font and base styles
 
 **Files:**
+
 - Modify: `package.json`, `package-lock.json` (via npm)
 - Modify: `src/styles.css` (top of file: comment, `@import`, `:root` tokens, base `html/body/app-root/button/input/select/textarea`, `:focus-visible`, `.loading`)
 - Modify: `electron/main.ts:43` (`BrowserWindow` options)
 
 **Interfaces:**
+
 - Produces: the token set below, used by every later CSS task.
-  - Colours: as Global Constraints, plus `--color-accent-tint: rgb(0 225 240 / 0.08)` (placeholder/hover tint), `--color-backdrop: rgb(2 5 10 / 0.7)`, `--color-glass-border: #2d5cff66`, `--color-glass-card: rgb(255 255 255 / 0.07)`.
-  - Radii: `--radius-sm: 9px` (pill buttons, inputs), `--radius-md: 11px` (cards), `--radius-pill-outer: 12px` (header pill), `--radius-lg: 16px` (columns), `--radius-xl: 22px` (dialogs).
-  - Spacing: `--space-1: 4px`, `--space-2: 8px`, `--space-3: 12px`, `--space-4: 16px`, `--space-5: 24px`.
-  - Type: `--font-sans: 'Plus Jakarta Sans Variable', system-ui, sans-serif`, `--font-size-body: 14px`, `--font-size-small: 12px`, `--font-size-display: 26px`, `--font-weight-heavy: 800`, `--tracking-tight: -0.03em`, `--tracking-caps: 0.08em`.
-  - Effects: `--shadow-lift: 0 12px 32px rgb(0 0 0 / 0.5)`, `--focus-ring: 0 0 0 2px var(--color-bg), 0 0 0 4px var(--color-accent)` (two-layer so it shows on cyan too), `--transition-fast: 120ms ease`.
+    - Colours: as Global Constraints, plus `--color-accent-tint: rgb(0 225 240 / 0.08)` (placeholder/hover tint), `--color-backdrop: rgb(2 5 10 / 0.7)`, `--color-glass-border: #2d5cff66`, `--color-glass-card: rgb(255 255 255 / 0.07)`.
+    - Radii: `--radius-sm: 9px` (pill buttons, inputs), `--radius-md: 11px` (cards), `--radius-pill-outer: 12px` (header pill), `--radius-lg: 16px` (columns), `--radius-xl: 22px` (dialogs).
+    - Spacing: `--space-1: 4px`, `--space-2: 8px`, `--space-3: 12px`, `--space-4: 16px`, `--space-5: 24px`.
+    - Type: `--font-sans: 'Plus Jakarta Sans Variable', system-ui, sans-serif`, `--font-size-body: 14px`, `--font-size-small: 12px`, `--font-size-display: 26px`, `--font-weight-heavy: 800`, `--tracking-tight: -0.03em`, `--tracking-caps: 0.08em`.
+    - Effects: `--shadow-lift: 0 12px 32px rgb(0 0 0 / 0.5)`, `--focus-ring: 0 0 0 2px var(--color-bg), 0 0 0 4px var(--color-accent)` (two-layer so it shows on cyan too), `--transition-fast: 120ms ease`.
 
 - [ ] **Step 1: Install the font** — `npm install -D @fontsource-variable/plus-jakarta-sans`. Expected: it appears under `devDependencies`.
 
@@ -102,19 +106,21 @@ git commit -m "feat: add design tokens, bundled font and dark base styles"
 ### Task 3: Header — brand lockup, two-line week, pill controls
 
 **Files:**
+
 - Modify: `src/app/week-header.ts`
 - Modify: `src/app/app.ts:3,29-34,68`
 - Modify: `src/domain/dates.ts`, `src/domain/dates.test.ts` (remove `formatWeekLabel` and its test)
 - Modify: `src/styles.css` (replace the `/* Week header */` section)
 
 **Interfaces:**
+
 - Consumes: `formatWeekHeading(weekStart: string): WeekHeading` (Task 1); tokens (Task 2).
 - Produces: `WeekHeader` input `heading = input.required<WeekHeading>()` (replaces `label`); outputs `prev`, `next`, `today` unchanged. CSS classes `.week-header`, `.brand`, `.brand-mark`, `.brand-word`, `.week-title`, `.week-eyebrow`, `.week-range`, `.pill`, `.pill-button`, `.pill-button.is-primary`, `.icon` (reused by Task 5).
 
 - [ ] **Step 1: Template.** `WeekHeader` renders, inside `<header class="week-header">`:
-  1. `.brand` — inline SVG `.brand-mark` (viewBox `0 0 32 32`, `fill="currentColor"`, `aria-hidden="true"`, path: `M16 3a13 13 0 1 0 6.9 24l3.6 3.6 4.2-4.2-3.4-3.4A13 13 0 0 0 16 3zm0 7a6 6 0 1 1 0 12 6 6 0 0 1 0-12z`) and `<span class="brand-word">Quokka</span>`.
-  2. `.week-title` — `<span class="week-eyebrow">{{ heading().eyebrow }}</span>` and `<h1 class="week-range">{{ heading().range }}</h1>`.
-  3. `<div class="pill" role="group" aria-label="Week navigation">` — prev button (chevron-left SVG `.icon`, `aria-label="Previous week"`), `Today` button with `is-primary`, next button (chevron-right SVG, `aria-label="Next week"`). Chevron paths: left `M15 6l-6 6 6 6`, right `M9 6l6 6-6 6`, viewBox `0 0 24 24`, `fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"`.
+    1. `.brand` — inline SVG `.brand-mark` (viewBox `0 0 32 32`, `fill="currentColor"`, `aria-hidden="true"`, path: `M16 3a13 13 0 1 0 6.9 24l3.6 3.6 4.2-4.2-3.4-3.4A13 13 0 0 0 16 3zm0 7a6 6 0 1 1 0 12 6 6 0 0 1 0-12z`) and `<span class="brand-word">Quokka</span>`.
+    2. `.week-title` — `<span class="week-eyebrow">{{ heading().eyebrow }}</span>` and `<h1 class="week-range">{{ heading().range }}</h1>`.
+    3. `<div class="pill" role="group" aria-label="Week navigation">` — prev button (chevron-left SVG `.icon`, `aria-label="Previous week"`), `Today` button with `is-primary`, next button (chevron-right SVG, `aria-label="Next week"`). Chevron paths: left `M15 6l-6 6 6 6`, right `M9 6l6 6-6 6`, viewBox `0 0 24 24`, `fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"`.
 
 - [ ] **Step 2: Wire `app.ts`:** import `formatWeekHeading` instead of `formatWeekLabel`; `weekHeading = computed(() => formatWeekHeading(this.viewedWeekStart()))`; bind `[heading]="weekHeading()"`.
 
@@ -136,19 +142,21 @@ git commit -m "feat: restyle header with brand lockup and two-line week title"
 ### Task 4: Board — columns, today, past, glass backlog, cards, add, drag
 
 **Files:**
+
 - Modify: `src/styles.css` (sections `/* Board */`, `/* Card */`, `/* Add */`, `/* Drag and drop */`)
 
 **Interfaces:**
+
 - Consumes: tokens (Task 2). No template changes; existing classes `.board`, `.week`, `.backlog`, `.list`, `.is-today`, `.is-past`, `.list-heading`, `.cards`, `.card`, `.card-priority`, `.card-title`, `.card-status`, `.status-dot`, `.status-*`, `.add-button`, `.add-input`, `.card-placeholder`, `.cdk-*` keep their names.
 
 - [ ] **Step 1: CSS** per spec "Components":
-  - `.board`/`.week` gap `--space-3`; backlog width 240px.
-  - `.list` `--color-surface`, radius `--radius-lg`, padding `--space-3`, no border. `.list-heading` `--font-size-small` heavy uppercase `--tracking-caps` `--color-text-muted`.
-  - `.list.is-today` `box-shadow: inset 0 0 0 2px var(--color-accent)`; its heading `--color-accent`. `.list.is-past` `opacity: 0.5`.
-  - `.backlog .list` `linear-gradient(160deg, var(--color-glass-from), var(--color-glass-to))` + `inset 0 0 0 1px var(--color-glass-border)`; `.backlog .card` background `--color-glass-card`; backlog heading `--color-text`.
-  - `.card` `--color-surface-raised`, radius `--radius-md`, no border, padding `--space-2` `--space-3`, hover background lightened via `color-mix(in srgb, var(--color-surface-raised), white 6%)`, `transition: background var(--transition-fast)`. `.card-priority` muted heavy. `.card-status` muted. `.status-dot` `--color-text-muted`; in progress `--color-accent`; completed `--color-success`.
-  - `.add-button` muted, hover `--color-accent`. (`.add-input` is styled with the dialog fields in Task 5.)
-  - `.cdk-drag-preview .card` `--shadow-lift`. `.cdk-drag-placeholder, .card-placeholder` `2px dashed var(--color-accent)`, background `--color-accent-tint`, radius `--radius-md`.
+    - `.board`/`.week` gap `--space-3`; backlog width 240px.
+    - `.list` `--color-surface`, radius `--radius-lg`, padding `--space-3`, no border. `.list-heading` `--font-size-small` heavy uppercase `--tracking-caps` `--color-text-muted`.
+    - `.list.is-today` `box-shadow: inset 0 0 0 2px var(--color-accent)`; its heading `--color-accent`. `.list.is-past` `opacity: 0.5`.
+    - `.backlog .list` `linear-gradient(160deg, var(--color-glass-from), var(--color-glass-to))` + `inset 0 0 0 1px var(--color-glass-border)`; `.backlog .card` background `--color-glass-card`; backlog heading `--color-text`.
+    - `.card` `--color-surface-raised`, radius `--radius-md`, no border, padding `--space-2` `--space-3`, hover background lightened via `color-mix(in srgb, var(--color-surface-raised), white 6%)`, `transition: background var(--transition-fast)`. `.card-priority` muted heavy. `.card-status` muted. `.status-dot` `--color-text-muted`; in progress `--color-accent`; completed `--color-success`.
+    - `.add-button` muted, hover `--color-accent`. (`.add-input` is styled with the dialog fields in Task 5.)
+    - `.cdk-drag-preview .card` `--shadow-lift`. `.cdk-drag-placeholder, .card-placeholder` `2px dashed var(--color-accent)`, background `--color-accent-tint`, radius `--radius-md`.
 
 - [ ] **Step 2: Verify** `npm test && npm run build` — Expected: PASS. Run `grep -nE '#[0-9a-fA-F]{3,8}|rgba?\(' src/styles.css` — Expected: matches only inside the `:root` block.
 
@@ -164,22 +172,24 @@ git commit -m "feat: restyle board, cards and drag-and-drop"
 ### Task 5: Dialogs and banners
 
 **Files:**
+
 - Modify: `src/app/focus-view.ts` (close button glyph → SVG), `src/app/app.ts` (banner dismiss glyph → SVG)
 - Modify: `src/app/confirm-dialog.ts`, `src/app/focus-view.ts` (add `class="button"` / `button button-danger` to dialog buttons)
 - Modify: `src/styles.css` (sections `/* Banners */`, `/* Dialogs */`)
 
 **Interfaces:**
+
 - Consumes: `.icon` class (Task 3), tokens (Task 2).
 - Produces: reusable button classes `.button` (quiet: raised surface), `.button-danger` (danger text on danger-tinted bg), `.icon-button` (transparent square button holding an `.icon`). Close icon SVG: viewBox `0 0 24 24`, path `M6 6l12 12M18 6L6 18`, stroke as chevrons.
 
 - [ ] **Step 1: Templates.** Replace `✕` in `focus-view.ts` and the banner in `app.ts` with the close SVG inside `.icon-button` (keep existing `aria-label`s). Delete buttons get `button button-danger`; Cancel gets `button`. Remove the old `.danger` class usage.
 
 - [ ] **Step 2: CSS:**
-  - `.dialog-backdrop` `--color-backdrop`. `.dialog` `--color-surface`, radius `--radius-xl`, padding `--space-5`, `--shadow-lift`, inner `1px` `--color-border` ring.
-  - `.focus-header` muted; `.field` label muted small heavy; `.field input, select, textarea` and `.add-input` share one rule: `--color-surface-raised`, no border, radius `--radius-sm`, padding `--space-2` `--space-3`. `select` keeps a native arrow (no custom arrow needed). `.field-error` `--color-danger`.
-  - `.button` raised surface, radius `--radius-sm`, padding `--space-2` `--space-4`, heavy-ish (600). `.button-danger` `--color-danger` text, background `color-mix(in srgb, var(--color-danger) 15%, transparent)`.
-  - `.banner` `--color-surface-raised`, radius `--radius-md`, left `4px solid var(--color-warning)`; `.banner-error` left border `--color-danger`.
-  - Pick `--color-danger` and `--color-warning` values in `:root` that reach 4.5:1 on `--color-surface` (e.g. `#ff6b6b`, `#ffc857`).
+    - `.dialog-backdrop` `--color-backdrop`. `.dialog` `--color-surface`, radius `--radius-xl`, padding `--space-5`, `--shadow-lift`, inner `1px` `--color-border` ring.
+    - `.focus-header` muted; `.field` label muted small heavy; `.field input, select, textarea` and `.add-input` share one rule: `--color-surface-raised`, no border, radius `--radius-sm`, padding `--space-2` `--space-3`. `select` keeps a native arrow (no custom arrow needed). `.field-error` `--color-danger`.
+    - `.button` raised surface, radius `--radius-sm`, padding `--space-2` `--space-4`, heavy-ish (600). `.button-danger` `--color-danger` text, background `color-mix(in srgb, var(--color-danger) 15%, transparent)`.
+    - `.banner` `--color-surface-raised`, radius `--radius-md`, left `4px solid var(--color-warning)`; `.banner-error` left border `--color-danger`.
+    - Pick `--color-danger` and `--color-warning` values in `:root` that reach 4.5:1 on `--color-surface` (e.g. `#ff6b6b`, `#ffc857`).
 
 - [ ] **Step 3: Verify** `npm test && npm run build` — Expected: PASS; hex grep from Task 4 still matches only `:root`.
 
@@ -195,10 +205,12 @@ git commit -m "feat: restyle dialogs, fields and banners"
 ### Task 6: App icon
 
 **Files:**
+
 - Create: `assets-src/icon.svg` (source, not shipped), `public/icon.png` (512×512)
 - Modify: `public/favicon.ico` (regenerated), `electron/main.ts` (`icon` option), `forge.config.js` (deb `icon`)
 
 **Interfaces:**
+
 - Consumes: the Q path from Task 3.
 
 - [ ] **Step 1: Draw `assets-src/icon.svg`:** 512×512, rounded square `rx="112"` fill `#070b12`, the Q path scaled to ~60% and centred, fill `#00e1f0`.
@@ -221,11 +233,13 @@ git commit -m "feat: add Q app icon for window, favicon and deb"
 ### Task 7: Style guide, CLAUDE.md pointer, and visual verification
 
 **Files:**
+
 - Create: `docs/style-guide.md`
 - Modify: `CLAUDE.md` (Code rules: one line)
 - Possibly modify: `src/styles.css` (token tweaks found during verification)
 
 **Interfaces:**
+
 - Consumes: every class and token from Tasks 2–6 (the guide documents what was built, using the real names).
 
 - [ ] **Step 1: Write `docs/style-guide.md`** with the sections the spec lists under "Style guide": intent; token table (note `src/styles.css` `:root` is canonical); type scale; component patterns with class names (header, columns/today/past/backlog, cards, add, dialogs, buttons, banners, drag); rules for new UI (tokens only; cyan only for brand, today, primary action, focus, in-progress; radius/spacing scale; AA contrast; inline SVG icons with `currentColor`; no remote assets; styles only in `src/styles.css`); an "adding a component" checklist. Include the ASCII board sketch from the spec.

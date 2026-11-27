@@ -41,11 +41,11 @@ The user wants a focused screen for one day, used both to **plan** the day (pull
 
 ## Approaches
 
-| Approach | Trade-off | Verdict |
-|---|---|---|
+| Approach                                                                                                                                                               | Trade-off                                                                                                                                                                                   | Verdict                |
+| ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------- |
 | **Shell + routed middle**: `App` keeps the title bar, banners, backlog panel, ticket editor and drag-and-drop group; a `<router-outlet>` swaps `WeekPage` / `DayPage`. | One backlog, editor and drop handler; backlog doesn't remount when switching. The header must know which page is active; drag and drop must work across the outlet boundary (verify first). | **Chosen** by the user |
-| Two full pages, each with its own header, backlog and drop group | Each page self-contained; simplest routing. Header and backlog duplicated, backlog remounts on every switch. | Rejected |
-| No router, a `view` signal in `App` | Cheapest, but the user asked for routing, and it gives no structure for future screens. | Rejected |
+| Two full pages, each with its own header, backlog and drop group                                                                                                       | Each page self-contained; simplest routing. Header and backlog duplicated, backlog remounts on every switch.                                                                                | Rejected               |
+| No router, a `view` signal in `App`                                                                                                                                    | Cheapest, but the user asked for routing, and it gives no structure for future screens.                                                                                                     | Rejected               |
 
 Day view layout options (from the mockups): A zoomed-in day list, **B "Now" ticket on top** (chosen by the user), C separate Plan / Work modes.
 
@@ -53,14 +53,14 @@ Day view layout options (from the mockups): A zoomed-in day list, **B "Now" tick
 
 ### Routes
 
-| URL | Screen |
-|---|---|
-| `#/day/:date` | Day view for `date` (`YYYY-MM-DD`). |
-| `#/week/:weekStart` | Week view for the week containing `weekStart`. |
-| `#/` and anything unknown | Redirect to `#/day/<today>`. |
+| URL                       | Screen                                         |
+| ------------------------- | ---------------------------------------------- |
+| `#/day/:date`             | Day view for `date` (`YYYY-MM-DD`).            |
+| `#/week/:weekStart`       | Week view for the week containing `weekStart`. |
+| `#/` and anything unknown | Redirect to `#/day/<today>`.                   |
 
-- An invalid `:date` (not a real `YYYY-MM-DD` date) redirects to today's Day view. *(designer's call)*
-- A `:weekStart` that is a valid date but not a Monday is normalised to the Monday of its week (replace the URL). Invalid → this week. *(designer's call)*
+- An invalid `:date` (not a real `YYYY-MM-DD` date) redirects to today's Day view. _(designer's call)_
+- A `:weekStart` that is a valid date but not a Monday is normalised to the Monday of its week (replace the URL). Invalid → this week. _(designer's call)_
 - The app opens on today's Day view (decided by the user).
 
 ### Header (shared, in the shell)
@@ -70,12 +70,12 @@ Quokka   THURSDAY · WEEK 48         ▓▓▓░░ 2 of 5 done    [‹ Today �
          26 November
 ```
 
-- Day view: eyebrow `<Weekday> · Week <n>`, title `<d> <Month>` (year added when not the current year — *designer's call*). Progress shows "`<completed> of <total>` done" for that day, with a bar. Hidden when the day has no tickets. *(designer's call)*
+- Day view: eyebrow `<Weekday> · Week <n>`, title `<d> <Month>` (year added when not the current year — _designer's call_). Progress shows "`<completed> of <total>` done" for that day, with a bar. Hidden when the day has no tickets. _(designer's call)_
 - Week view: heading as today (`formatWeekHeading`), no progress.
 - **‹ ›** step one day in the Day view, one week in the Week view. **Today** goes to today's day / this week.
 - **Day | Week** switch (decided):
-  - Day → Week: the week containing the viewed day.
-  - Week → Day: today if today is in that week, otherwise that week's Monday.
+    - Day → Week: the week containing the viewed day.
+    - Week → Day: today if today is in that week, otherwise that week's Monday.
 - In the Week view, clicking a day's heading opens that day's Day view.
 - The header stays a window drag region with the window controls, as now.
 
@@ -85,15 +85,15 @@ Only on **today's** Day view. Among today's tickets, Now is:
 
 1. the highest-priority (lowest `position`) ticket with status **In Progress**; else
 2. the highest-priority ticket with status **Pending**; else
-3. none: the block shows "All done for today" (or "Nothing planned for today" if the day has no tickets — *designer's call*). Adding and dropping happen in the always-visible Up next zone below (see Drag and drop).
+3. none: the block shows "All done for today" (or "Nothing planned for today" if the day has no tickets — _designer's call_). Adding and dropping happen in the always-visible Up next zone below (see Drag and drop).
 
 This is a pure domain function, e.g. `nowTicket(tickets, today): Ticket | null`, unit-tested.
 
-The Now block shows: priority number, title, status, the full description (plain text, line breaks kept; scrolls within a max height if long — *designer's call*), and buttons:
+The Now block shows: priority number, title, status, the full description (plain text, line breaks kept; scrolls within a max height if long — _designer's call_), and buttons:
 
 - **Start** — only when the Now ticket is Pending; sets it to In Progress.
 - **Done → next** — sets it to Completed. The rule is re-evaluated, so the next ticket becomes Now.
-- **Open** — opens the existing ticket editor (the current "focus view" modal). Clicking the title does the same. *(designer's call)*
+- **Open** — opens the existing ticket editor (the current "focus view" modal). Clicking the title does the same. _(designer's call)_
 
 Statuses never change automatically.
 
@@ -115,7 +115,7 @@ DONE                                              │         │
 
 - **Up next**: every other open ticket of the day, in priority order, each with its priority number (`position + 1`), title, first line of description (truncated, muted), status, and a **Start** button for Pending tickets. Clicking a row opens the ticket editor.
 - Starting a ticket from Up next does not reorder anything; it becomes Now only if rule 1 picks it (i.e. no higher-priority ticket is In Progress). Other In Progress tickets stay in Up next with their blue dot.
-- **Done**: the day's completed tickets (the existing pile), dimmed, locked as today. Clicking opens the editor. Hidden when empty. *(designer's call)*
+- **Done**: the day's completed tickets (the existing pile), dimmed, locked as today. Clicking opens the editor. Hidden when empty. _(designer's call)_
 - **+ add** at the end of Up next; new tickets go to the bottom of the open tickets, as everywhere.
 
 ### Other days in the Day view (designer's calls, agreed in conversation)
@@ -126,11 +126,11 @@ DONE                                              │         │
 ### Drag and drop in the Day view
 
 - Up next is a drop list for the viewed date, connected to the backlog (same `cdkDropListGroup` in the shell). Reordering within Up next and moving to/from the backlog follow the existing rules (`canDropInto`, `moveTicket`, completed tickets locked).
-- The Now ticket is **not** draggable and the Now block is not a drop target. *(designer's call: it is picked by status, not position, so dragging it would be confusing.)* To change its priority, use the Week view, or change statuses.
+- The Now ticket is **not** draggable and the Now block is not a drop target. _(designer's call: it is picked by status, not position, so dragging it would be confusing.)_ To change its priority, use the Week view, or change statuses.
 - **Index mapping:** because the Now ticket is shown outside the list, a CDK index in Up next is not the ticket's position in the day. A pure domain function maps a drop index in "open tickets minus Now" to the `toIndex` that `moveTicket` expects, unit-tested. Without Now (future days) the mapping is the identity.
-  - Rule: the dropped ticket goes **directly before the visible ticket below the drop gap**. If the gap is at the end of Up next, it goes to the end of the day's open tickets (after Now). *(builder's call: otherwise a drop at the bottom could land above Now.)* So a gap whose neighbours straddle Now's position always lands **after** Now. *(designer's call: Now is never displaced by a pure reorder.)*
-  - A drop can still change Now through the status rule: an **In Progress** ticket placed above the current Now (or any In Progress ticket dropped while Now is a Pending ticket) becomes Now, exactly as if it had been started there; the card moves into the Now block. *(decided by the user, option A: allow the jump; the alternative of refusing such drops was rejected.)*
-- **Empty states:** on today and future days, Up next is always shown, even when empty, as a visible drop zone ("Drag tickets here from the backlog") with **+ add** below it. On today with no open tickets, the Now block shows the "All done / Nothing planned" message only; the hint points to the Up next zone. *(designer's call: one drop target, no special case in the Now block.)*
+    - Rule: the dropped ticket goes **directly before the visible ticket below the drop gap**. If the gap is at the end of Up next, it goes to the end of the day's open tickets (after Now). _(builder's call: otherwise a drop at the bottom could land above Now.)_ So a gap whose neighbours straddle Now's position always lands **after** Now. _(designer's call: Now is never displaced by a pure reorder.)_
+    - A drop can still change Now through the status rule: an **In Progress** ticket placed above the current Now (or any In Progress ticket dropped while Now is a Pending ticket) becomes Now, exactly as if it had been started there; the card moves into the Now block. _(decided by the user, option A: allow the jump; the alternative of refusing such drops was rejected.)_
+- **Empty states:** on today and future days, Up next is always shown, even when empty, as a visible drop zone ("Drag tickets here from the backlog") with **+ add** below it. On today with no open tickets, the Now block shows the "All done / Nothing planned" message only; the hint points to the Up next zone. _(designer's call: one drop target, no special case in the Now block.)_
 
 ### Date change while open
 
