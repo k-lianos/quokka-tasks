@@ -8,6 +8,8 @@ import { createStore, type Store } from './storage';
 const DEV_URL = 'http://localhost:4200';
 const FLUSH_TIMEOUT_MS = 2000;
 const isDev = !app.isPackaged && process.argv.includes('--dev');
+const isMac = process.platform === 'darwin';
+let quitting = false;
 
 // Keep data in <appData>/quokka-tasks regardless of productName.
 // An explicit --user-data-dir (used for isolated test runs) wins.
@@ -57,7 +59,9 @@ function createWindow(store: Store): BrowserWindow {
         height: 800,
         minWidth: 900,
         title: 'Quokka Tasks',
-        frame: false, // the UI draws its own title bar (WeekHeader + WindowControls)
+        // The UI draws its own title bar (AppHeader). On Linux/Windows the window is frameless and the UI
+        // also draws the window buttons (WindowControls); macOS keeps its native traffic lights instead.
+        ...(isMac ? { titleBarStyle: 'hiddenInset' as const, trafficLightPosition: { x: 18, y: 24 } } : { frame: false }),
         icon: path.join(app.getAppPath(), 'dist/renderer/browser/icon.png'),
         backgroundColor: '#070b12', // matches --color-bg in src/styles.css, so no white flash on launch
         webPreferences: {
@@ -120,6 +124,12 @@ function handleCloseFlush(win: BrowserWindow, store: Store): void {
     });
 }
 
+// Cmd+Q closes the window through handleCloseFlush, which cancels that first close, so the quit
+// itself gets cancelled. Remember it and quit once the window has gone.
+app.on('before-quit', () => {
+    quitting = true;
+});
+
 app.on('window-all-closed', () => {
-    if (process.platform !== 'darwin') app.quit();
+    if (!isMac || quitting) app.quit();
 });

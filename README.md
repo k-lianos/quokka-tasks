@@ -50,17 +50,31 @@ npx electron .
 ```bash
 npm test           # unit tests (Vitest)
 npm run build      # build UI + main process (also the type check)
-npm run make       # .deb and .zip in out/make/
+npm run make       # .deb and .zip in out/make/ (on a Mac: a .zip with Quokka Tasks.app)
 ```
 
 Install the package with `sudo apt install ./out/make/deb/x64/quokka-tasks_*_amd64.deb`.
+
+## Install on macOS
+
+Download `Quokka Tasks-darwin-arm64-<version>.zip` (Apple Silicon) or
+`Quokka Tasks-darwin-x64-<version>.zip` (Intel) from the
+[releases](https://github.com/k-lianos/quokka-tasks/releases), unzip it and move
+`Quokka Tasks.app` to Applications.
+
+The app isn't signed with an Apple Developer ID, so on first launch macOS refuses to open it
+("damaged" or "Apple could not verify"). Allow it once, either way:
+
+- Open it, then go to System Settings → Privacy & Security and click **Open Anyway**.
+- Or clear the download quarantine: `xattr -dr com.apple.quarantine "/Applications/Quokka Tasks.app"`.
 
 ## CI and releases
 
 GitHub Actions runs `format:check`, the tests and the build on every pull request and on
 pushes to `main` (`.github/workflows/ci.yml`). `main` requires that check to pass.
 
-Releases are git tags that publish the `.deb` and `.zip` as a GitHub Release. See
+Releases are git tags that publish the Linux `.deb` and `.zip` and the macOS `.zip` files
+as a GitHub Release. See
 [`docs/releasing.md`](docs/releasing.md), or run `/release` in Claude Code.
 
 ## Your data
