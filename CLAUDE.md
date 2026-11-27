@@ -16,6 +16,7 @@ Stack: Electron (main process in `electron/`, compiled with `tsc`), Angular 22 U
 - `start` and `dev` pass `--no-sandbox` on purpose: Ubuntu's AppArmor blocks the Chromium sandbox for the Electron binary in `node_modules` (see README). Don't remove it. Only the packaged `.deb` runs sandboxed, so check sandbox-sensitive changes there.
 - `npm test` — Vitest unit tests (`src/domain/**/*.test.ts`, `electron/**/*.test.ts`).
 - `npm run make` — build and package (`.deb` + zip in `out/make/`).
+- `npm run format` — format everything with Prettier. A husky pre-commit hook runs lint-staged, which formats staged files with Prettier automatically.
 - Standard verification: `npm test && npm run build`. There is no linter yet; strict TypeScript and Angular strict templates are the static check.
 
 ## Code rules
