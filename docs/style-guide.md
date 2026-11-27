@@ -36,70 +36,70 @@ Origin: a brand mood board (navy, cyan, royal-blue glass, rounded tiles, chunky 
 
 ### Colour
 
-| Token | Value | Use |
-|---|---|---|
-| `--color-bg` | `#070b12` | app background (also Electron `backgroundColor` in `electron/main.ts`; keep in sync) |
-| `--color-surface` | `#0d131d` | day columns, dialogs |
-| `--color-surface-raised` | `#131b28` | cards, inputs, buttons, the header pill |
-| `--color-border` | `#1c2636` | hairlines, dividers, dialog edge |
-| `--color-accent` | `#00e1f0` | electric cyan (see rule 3) |
-| `--color-on-accent` | `#04121a` | text/icons on cyan |
-| `--color-accent-tint` | cyan at 8% | hover backgrounds, drop placeholder fill |
-| `--color-glass-from` / `--color-glass-to` | `#0f2a8a` / `#0a1a55` | backlog gradient (160°) |
-| `--color-glass-border` | `#2d5cff66` | backlog inner edge |
-| `--color-glass-card` | white at 7% | cards on the glass panel |
-| `--color-glass-text-muted` | `#b4c0d6` | muted text on the glass panel |
-| `--color-text` | `#f2f6fa` | primary text |
-| `--color-text-muted` | `#8a97a8` | headings, meta, status labels |
-| `--color-success` | `#3ddc97` | completed |
-| `--color-danger` | `#ff6b6b` | delete, errors |
-| `--color-warning` | `#ffc857` | notices |
-| `--color-backdrop` | near-black at 70% | dialog backdrop |
+| Token                                     | Value                 | Use                                                                                  |
+| ----------------------------------------- | --------------------- | ------------------------------------------------------------------------------------ |
+| `--color-bg`                              | `#070b12`             | app background (also Electron `backgroundColor` in `electron/main.ts`; keep in sync) |
+| `--color-surface`                         | `#0d131d`             | day columns, dialogs                                                                 |
+| `--color-surface-raised`                  | `#131b28`             | cards, inputs, buttons, the header pill                                              |
+| `--color-border`                          | `#1c2636`             | hairlines, dividers, dialog edge                                                     |
+| `--color-accent`                          | `#00e1f0`             | electric cyan (see rule 3)                                                           |
+| `--color-on-accent`                       | `#04121a`             | text/icons on cyan                                                                   |
+| `--color-accent-tint`                     | cyan at 8%            | hover backgrounds, drop placeholder fill                                             |
+| `--color-glass-from` / `--color-glass-to` | `#0f2a8a` / `#0a1a55` | backlog gradient (160°)                                                              |
+| `--color-glass-border`                    | `#2d5cff66`           | backlog inner edge                                                                   |
+| `--color-glass-card`                      | white at 7%           | cards on the glass panel                                                             |
+| `--color-glass-text-muted`                | `#b4c0d6`             | muted text on the glass panel                                                        |
+| `--color-text`                            | `#f2f6fa`             | primary text                                                                         |
+| `--color-text-muted`                      | `#8a97a8`             | headings, meta, status labels                                                        |
+| `--color-success`                         | `#3ddc97`             | completed                                                                            |
+| `--color-danger`                          | `#ff6b6b`             | delete, errors                                                                       |
+| `--color-warning`                         | `#ffc857`             | notices                                                                              |
+| `--color-backdrop`                        | near-black at 70%     | dialog backdrop                                                                      |
 
 Checked contrast (AA): muted on surface 6.3, muted on raised 5.8, danger on surface 6.7, on-accent on accent 11.8, text on glass ≥ 11, glass-muted on glass card 5.6.
 
 ### Shape, space, type, effects
 
-| Group | Tokens |
-|---|---|
-| Radius | `--radius-sm` 9px (buttons, inputs) · `--radius-md` 11px (cards, banners) · `--radius-pill-outer` 12px (header pill) · `--radius-lg` 16px (columns) · `--radius-xl` 22px (dialogs) |
-| Space | `--space-1` 4 · `--space-2` 8 · `--space-3` 12 · `--space-4` 16 · `--space-5` 24 (px) |
-| Font | `--font-sans`: Plus Jakarta Sans Variable (bundled via `@fontsource-variable/plus-jakarta-sans`), fallback `system-ui` |
-| Size | `--font-size-small` 12px · `--font-size-body` 14px · `--font-size-display` 26px |
-| Weight | `--font-weight-heavy` 800 for display, brand, column headings; 600 for buttons; 400 body |
-| Tracking | `--tracking-tight` -0.03em (display, brand) · `--tracking-caps` 0.08em (uppercase labels) |
-| Effects | `--shadow-lift` (dialogs, drag preview) · `--focus-ring` (2px bg gap + 2px cyan, visible on cyan too) · `--transition-fast` 120ms |
+| Group    | Tokens                                                                                                                                                                             |
+| -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Radius   | `--radius-sm` 9px (buttons, inputs) · `--radius-md` 11px (cards, banners) · `--radius-pill-outer` 12px (header pill) · `--radius-lg` 16px (columns) · `--radius-xl` 22px (dialogs) |
+| Space    | `--space-1` 4 · `--space-2` 8 · `--space-3` 12 · `--space-4` 16 · `--space-5` 24 (px)                                                                                              |
+| Font     | `--font-sans`: Plus Jakarta Sans Variable (bundled via `@fontsource-variable/plus-jakarta-sans`), fallback `system-ui`                                                             |
+| Size     | `--font-size-small` 12px · `--font-size-body` 14px · `--font-size-display` 26px                                                                                                    |
+| Weight   | `--font-weight-heavy` 800 for display, brand, column headings; 600 for buttons; 400 body                                                                                           |
+| Tracking | `--tracking-tight` -0.03em (display, brand) · `--tracking-caps` 0.08em (uppercase labels)                                                                                          |
+| Effects  | `--shadow-lift` (dialogs, drag preview) · `--focus-ring` (2px bg gap + 2px cyan, visible on cyan too) · `--transition-fast` 120ms                                                  |
 
 ### Type scale
 
-| Role | Style |
-|---|---|
-| Display (week range) | 26px / 800 / tight |
-| Brand word | 22px / 800 / tight |
-| Eyebrow (week number) | 11px / 800 / caps / cyan |
-| Column heading | 12px / 800 / caps / muted |
-| Field label | 12px / 800 / muted (not uppercase) |
-| Body, card title, inputs | 14px / 400 |
-| Meta (status) | 12px / muted · priority number 12px / 800 / muted |
+| Role                     | Style                                             |
+| ------------------------ | ------------------------------------------------- |
+| Display (week range)     | 26px / 800 / tight                                |
+| Brand word               | 22px / 800 / tight                                |
+| Eyebrow (week number)    | 11px / 800 / caps / cyan                          |
+| Column heading           | 12px / 800 / caps / muted                         |
+| Field label              | 12px / 800 / muted (not uppercase)                |
+| Body, card title, inputs | 14px / 400                                        |
+| Meta (status)            | 12px / muted · priority number 12px / 800 / muted |
 
 ## Components
 
-| Component | Classes | Notes |
-|---|---|---|
-| Header | `.week-header`, `.week-header-lead`, `.brand`, `.brand-mark`, `.brand-word`, `.week-title`, `.week-eyebrow`, `.week-range` | No bar. Lockup, divider and two-line week on the left; pill centred on the window; window controls on the right. |
-| Title bar | `.title-bar`, `.title-strip` | The window is frameless: the header is the drag handle (`-webkit-app-region: drag`, buttons `no-drag`) and bleeds to the window's top edge. While loading or on a load error, a bare `.title-strip` holds just the window controls. Banners go below it. |
-| Window controls | `.window-controls`, `.window-control`, `.window-control-close` | Minimise, maximise/restore, close as `.icon-button`s at the right of the title bar. Close hover = red text on 15% red. |
-| Segmented pill | `.pill`, `.pill-button`, `.pill-button.is-primary` | Raised-surface track; one primary (cyan) button max. |
-| Day column | `.list`, `.list-heading`, `.list.is-today`, `.list.is-past` | Surface panel. Today = 2px inset cyan outline + cyan heading. Past = hollow (transparent with a 1px border), cards on `--color-surface`, titles muted. Never dim with `opacity`: it breaks AA contrast. |
-| Backlog (glass) | `.backlog .list` | Royal-blue gradient + blue inner edge; cards translucent white; muted text uses `--color-glass-text-muted`. |
-| Card | `.card`, `.card-priority`, `.card-title`, `.card-status`, `.status-dot` | Raised surface, one-line title with ellipsis. Dot: muted = to do, cyan = in progress, green = done. Completed cards (`.is-locked`) are locked: not drag items (`order: 1` keeps them below any drag placeholder), drawn flat — transparent with a 1px border (`--color-text-muted` at half strength; in the backlog `--color-glass-text-muted` at half strength) — with a muted, struck-through title. They keep the pointer cursor, a faint hover fill (`--color-surface-raised`; in the backlog `--color-glass-card`) and the cyan focus ring, and still open on click. |
-| Add | `.add-button`, `.add-input` | Quiet muted text, cyan on hover; input styled like fields. |
-| Buttons | `.button`, `.button-danger`, `.icon-button` | Quiet raised button; danger = red text on 15% red; icon button = 30px square, transparent. |
-| Fields | `.field`, `.field input/select/textarea`, `.field-error` | Label above, small heavy muted; borderless raised inputs; focus ring on focus. |
-| Dialog | `.dialog-backdrop`, `.dialog`, `.dialog-actions` | Surface panel, `--radius-xl`, 1px border ring + lift shadow, dark backdrop. |
-| Banner | `.banner`, `.banner-error` | Raised surface with a 4px left stripe: warning (notice) or danger (error). |
-| Drag and drop | `.card-placeholder`, `.cdk-drag-preview` | Placeholder: 2px dashed cyan on cyan tint. Preview: lift shadow. |
-| Icon | `.icon` | 16px inline SVG, `currentColor`, stroke 2.5, round caps. |
+| Component       | Classes                                                                                                                    | Notes                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
+| --------------- | -------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Header          | `.week-header`, `.week-header-lead`, `.brand`, `.brand-mark`, `.brand-word`, `.week-title`, `.week-eyebrow`, `.week-range` | No bar. Lockup, divider and two-line week on the left; pill centred on the window; window controls on the right.                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
+| Title bar       | `.title-bar`, `.title-strip`                                                                                               | The window is frameless: the header is the drag handle (`-webkit-app-region: drag`, buttons `no-drag`) and bleeds to the window's top edge. While loading or on a load error, a bare `.title-strip` holds just the window controls. Banners go below it.                                                                                                                                                                                                                                                                                                                  |
+| Window controls | `.window-controls`, `.window-control`, `.window-control-close`                                                             | Minimise, maximise/restore, close as `.icon-button`s at the right of the title bar. Close hover = red text on 15% red.                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
+| Segmented pill  | `.pill`, `.pill-button`, `.pill-button.is-primary`                                                                         | Raised-surface track; one primary (cyan) button max.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
+| Day column      | `.list`, `.list-heading`, `.list.is-today`, `.list.is-past`                                                                | Surface panel. Today = 2px inset cyan outline + cyan heading. Past = hollow (transparent with a 1px border), cards on `--color-surface`, titles muted. Never dim with `opacity`: it breaks AA contrast.                                                                                                                                                                                                                                                                                                                                                                   |
+| Backlog (glass) | `.backlog .list`                                                                                                           | Royal-blue gradient + blue inner edge; cards translucent white; muted text uses `--color-glass-text-muted`.                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
+| Card            | `.card`, `.card-priority`, `.card-title`, `.card-status`, `.status-dot`                                                    | Raised surface, one-line title with ellipsis. Dot: muted = to do, cyan = in progress, green = done. Completed cards (`.is-locked`) are locked: not drag items (`order: 1` keeps them below any drag placeholder), drawn flat — transparent with a 1px border (`--color-text-muted` at half strength; in the backlog `--color-glass-text-muted` at half strength) — with a muted, struck-through title. They keep the pointer cursor, a faint hover fill (`--color-surface-raised`; in the backlog `--color-glass-card`) and the cyan focus ring, and still open on click. |
+| Add             | `.add-button`, `.add-input`                                                                                                | Quiet muted text, cyan on hover; input styled like fields.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
+| Buttons         | `.button`, `.button-danger`, `.icon-button`                                                                                | Quiet raised button; danger = red text on 15% red; icon button = 30px square, transparent.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
+| Fields          | `.field`, `.field input/select/textarea`, `.field-error`                                                                   | Label above, small heavy muted; borderless raised inputs; focus ring on focus.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
+| Dialog          | `.dialog-backdrop`, `.dialog`, `.dialog-actions`                                                                           | Surface panel, `--radius-xl`, 1px border ring + lift shadow, dark backdrop.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
+| Banner          | `.banner`, `.banner-error`                                                                                                 | Raised surface with a 4px left stripe: warning (notice) or danger (error).                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
+| Drag and drop   | `.card-placeholder`, `.cdk-drag-preview`                                                                                   | Placeholder: 2px dashed cyan on cyan tint. Preview: lift shadow.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
+| Icon            | `.icon`                                                                                                                    | 16px inline SVG, `currentColor`, stroke 2.5, round caps.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
 
 ## Brand mark and app icon
 

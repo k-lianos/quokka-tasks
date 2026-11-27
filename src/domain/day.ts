@@ -5,13 +5,13 @@ import { listOf } from './tickets';
 
 /** The ticket to work on: the highest-priority In Progress ticket, else the highest-priority Pending one. */
 export function nowTicket(tickets: Ticket[], date: string): Ticket | null {
-  const day = listOf(tickets, date);
-  return day.find((t) => t.status === 'in_progress') ?? day.find((t) => t.status === 'pending') ?? null;
+    const day = listOf(tickets, date);
+    return day.find(t => t.status === 'in_progress') ?? day.find(t => t.status === 'pending') ?? null;
 }
 
 export function dayProgress(tickets: Ticket[], date: string): { done: number; total: number } {
-  const day = tickets.filter((t) => t.date === date);
-  return { done: day.filter((t) => t.status === 'completed').length, total: day.length };
+    const day = tickets.filter(t => t.date === date);
+    return { done: day.filter(t => t.status === 'completed').length, total: day.length };
 }
 
 /**
@@ -21,6 +21,6 @@ export function dayProgress(tickets: Ticket[], date: string): { done: number; to
  * Up next, after every open ticket (so a drop never lands just above a hidden Now).
  */
 export function upNextToIndex(otherOpenIds: string[], nowId: string | null, dropIndex: number): number {
-  const visible = otherOpenIds.filter((id) => id !== nowId);
-  return dropIndex < visible.length ? otherOpenIds.indexOf(visible[dropIndex]) : otherOpenIds.length;
+    const visible = otherOpenIds.filter(id => id !== nowId);
+    return dropIndex < visible.length ? otherOpenIds.indexOf(visible[dropIndex]) : otherOpenIds.length;
 }

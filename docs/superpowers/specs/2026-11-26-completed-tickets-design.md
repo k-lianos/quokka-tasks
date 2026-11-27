@@ -29,11 +29,11 @@ A completed ticket is a record of work done on that day, so it should stay put a
 
 ## Approaches
 
-| Approach | Trade-off | Verdict |
-|---|---|---|
-| **Domain invariant** (like rollover): a pure normaliser in `src/domain/` applied on every change and on load; `moveTicket` refuses completed tickets and clamps the drop index above the pile; cards get `cdkDragDisabled` when completed. | Small, unit-tested, positions always match the screen. | **Chosen** by the user |
-| Display-only sort | Less code, but priority numbers and CDK drop indexes no longer match stored positions → misplaced drops. | Rejected |
-| Separate "Done" drop list per column | Clear, but a second list per column with its own layout; more than "pile at the bottom" needs. | Rejected |
+| Approach                                                                                                                                                                                                                                   | Trade-off                                                                                                | Verdict                |
+| ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------- | ---------------------- |
+| **Domain invariant** (like rollover): a pure normaliser in `src/domain/` applied on every change and on load; `moveTicket` refuses completed tickets and clamps the drop index above the pile; cards get `cdkDragDisabled` when completed. | Small, unit-tested, positions always match the screen.                                                   | **Chosen** by the user |
+| Display-only sort                                                                                                                                                                                                                          | Less code, but priority numbers and CDK drop indexes no longer match stored positions → misplaced drops. | Rejected               |
+| Separate "Done" drop list per column                                                                                                                                                                                                       | Clear, but a second list per column with its own layout; more than "pile at the bottom" needs.           | Rejected               |
 
 ## The how (decided)
 
