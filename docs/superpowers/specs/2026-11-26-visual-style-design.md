@@ -58,20 +58,20 @@ Mockups: `.superpowers/brainstorm/*/content/cyan-direction.html` (option C) and 
 
 ### Palette (tokens; starting values, builder may tune for contrast)
 
-| Token | Value | Use |
-|---|---|---|
-| `--color-bg` | `#070b12` | app background, Electron window `backgroundColor` |
-| `--color-surface` | `#0d131d` | day columns, dialogs |
-| `--color-surface-raised` | `#131b28` | cards, inputs, pill controls |
-| `--color-border` | `#1c2636` | hairlines, dividers |
-| `--color-accent` | `#00e1f0` | electric cyan: mark, today outline, primary button, focus ring, in-progress |
-| `--color-on-accent` | `#04121a` | text/icons on cyan |
-| `--color-glass-from` / `--color-glass-to` | `#0f2a8a` / `#0a1a55` | backlog gradient, with `#2d5cff66` inner border |
-| `--color-text` | `#f2f6fa` | primary text |
-| `--color-text-muted` | `#8a97a8` | headings, meta, status labels |
-| `--color-success` | `#3ddc97` | completed dot |
-| `--color-danger` | red tuned for dark bg (e.g. `#ff6b6b`) | delete, errors |
-| `--color-warning` | amber for the notice banner | notice banner |
+| Token                                     | Value                                  | Use                                                                         |
+| ----------------------------------------- | -------------------------------------- | --------------------------------------------------------------------------- |
+| `--color-bg`                              | `#070b12`                              | app background, Electron window `backgroundColor`                           |
+| `--color-surface`                         | `#0d131d`                              | day columns, dialogs                                                        |
+| `--color-surface-raised`                  | `#131b28`                              | cards, inputs, pill controls                                                |
+| `--color-border`                          | `#1c2636`                              | hairlines, dividers                                                         |
+| `--color-accent`                          | `#00e1f0`                              | electric cyan: mark, today outline, primary button, focus ring, in-progress |
+| `--color-on-accent`                       | `#04121a`                              | text/icons on cyan                                                          |
+| `--color-glass-from` / `--color-glass-to` | `#0f2a8a` / `#0a1a55`                  | backlog gradient, with `#2d5cff66` inner border                             |
+| `--color-text`                            | `#f2f6fa`                              | primary text                                                                |
+| `--color-text-muted`                      | `#8a97a8`                              | headings, meta, status labels                                               |
+| `--color-success`                         | `#3ddc97`                              | completed dot                                                               |
+| `--color-danger`                          | red tuned for dark bg (e.g. `#ff6b6b`) | delete, errors                                                              |
+| `--color-warning`                         | amber for the notice banner            | notice banner                                                               |
 
 Plus radius tokens (≈ 9 / 11 / 16 / 22px), a spacing scale, and font tokens.
 
@@ -95,9 +95,10 @@ Plus Jakarta Sans (variable), bundled via Fontsource. Wordmark and big week date
 ### Header label (domain change)
 
 The header needs the week split into two strings. Add a function in `src/domain/dates.ts` (tested) returning `{ eyebrow, range }`, e.g. `Week 48 · 2026` and `23 – 29 November`. Rules:
+
 - Year in the eyebrow is the ISO week's year (year of its Thursday).
 - Range across months: `30 November – 6 December`; across years: `29 December 2026 – 4 January 2027`.
-`formatWeekLabel` stays if still used elsewhere, otherwise is removed with its tests updated.
+  `formatWeekLabel` stays if still used elsewhere, otherwise is removed with its tests updated.
 
 ### Brand mark and app icon
 
@@ -111,6 +112,7 @@ The header needs the week split into two strings. Add a function in `src/domain/
 ### Style guide (the "for future features" doc)
 
 `docs/style-guide.md` — the reference for anyone adding UI:
+
 - the intent in a few lines (dark, confident, cyan is precious);
 - the token table (copy of the source of truth in `src/styles.css`, which is canonical);
 - typography scale;

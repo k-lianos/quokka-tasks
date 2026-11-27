@@ -31,10 +31,12 @@
 ### Task 1: Domain — `sinkCompleted` and a locked, clamped `moveTicket`
 
 **Files:**
+
 - Modify: `src/domain/tickets.ts`
 - Test: `src/domain/tickets.test.ts`
 
 **Interfaces:**
+
 - Produces: `export function sinkCompleted(tickets: Ticket[]): Ticket[]` — per list, stable order: non-completed by position, then completed by position; renumbers via the existing private `placeList`; returns the input array when already ordered. Does not touch `updatedAt` (pass an empty `touched` set, like `renumberAll`).
 - Produces: `moveTicket` (same signature) now returns `tickets` unchanged when the ticket is completed, and clamps `toIndex` to the number of non-completed tickets in the target list (excluding the moving ticket).
 
@@ -46,55 +48,60 @@ const done = (id: string, position: number) => makeTicket({ id, date: D, positio
 const open = (id: string, position: number) => makeTicket({ id, date: D, position });
 
 test('sinkCompleted moves completed tickets below open ones, keeping each group in order', () => {
-  const r = sinkCompleted([done('d1', 0), open('o1', 1), done('d2', 2), open('o2', 3)]);
-  expect(listOf(r, D).map((t) => [t.id, t.position])).toEqual([['o1', 0], ['o2', 1], ['d1', 2], ['d2', 3]]);
+    const r = sinkCompleted([done('d1', 0), open('o1', 1), done('d2', 2), open('o2', 3)]);
+    expect(listOf(r, D).map(t => [t.id, t.position])).toEqual([
+        ['o1', 0],
+        ['o2', 1],
+        ['d1', 2],
+        ['d2', 3],
+    ]);
 });
 
 test('sinkCompleted returns the same array when already ordered (idempotent)', () => {
-  const ordered = [open('o1', 0), done('d1', 1)];
-  expect(sinkCompleted(ordered)).toBe(ordered);
-  const once = sinkCompleted([done('d1', 0), open('o1', 1)]);
-  expect(sinkCompleted(once)).toBe(once);
+    const ordered = [open('o1', 0), done('d1', 1)];
+    expect(sinkCompleted(ordered)).toBe(ordered);
+    const once = sinkCompleted([done('d1', 0), open('o1', 1)]);
+    expect(sinkCompleted(once)).toBe(once);
 });
 
 test('a ticket marked completed goes to the top of the pile', () => {
-  const list = [open('o1', 0), open('o2', 1), done('d1', 2)];
-  const r = sinkCompleted(updateTicket(list, 'o1', { status: 'completed' }, NOW));
-  expect(ids(listOf(r, D))).toEqual(['o2', 'o1', 'd1']);
+    const list = [open('o1', 0), open('o2', 1), done('d1', 2)];
+    const r = sinkCompleted(updateTicket(list, 'o1', { status: 'completed' }, NOW));
+    expect(ids(listOf(r, D))).toEqual(['o2', 'o1', 'd1']);
 });
 
 test('a ticket set back from completed becomes the last open ticket', () => {
-  const list = [open('o1', 0), done('d1', 1), done('d2', 2)];
-  const r = sinkCompleted(updateTicket(list, 'd2', { status: 'pending' }, NOW));
-  expect(ids(listOf(r, D))).toEqual(['o1', 'd2', 'd1']);
+    const list = [open('o1', 0), done('d1', 1), done('d2', 2)];
+    const r = sinkCompleted(updateTicket(list, 'd2', { status: 'pending' }, NOW));
+    expect(ids(listOf(r, D))).toEqual(['o1', 'd2', 'd1']);
 });
 
 test('a new ticket in a day with completed tickets lands above the pile', () => {
-  const r = sinkCompleted(createTicket([open('o1', 0), done('d1', 1)], { id: 'n', title: 'N', date: D, now: NOW }));
-  expect(ids(listOf(r, D))).toEqual(['o1', 'n', 'd1']);
+    const r = sinkCompleted(createTicket([open('o1', 0), done('d1', 1)], { id: 'n', title: 'N', date: D, now: NOW }));
+    expect(ids(listOf(r, D))).toEqual(['o1', 'n', 'd1']);
 });
 
 test('moveTicket refuses to move a completed ticket', () => {
-  const list = [open('o1', 0), done('d1', 1)];
-  expect(moveTicket(list, 'd1', null, 0, NOW)).toBe(list);
-  expect(moveTicket(list, 'd1', D, 0, NOW)).toBe(list);
+    const list = [open('o1', 0), done('d1', 1)];
+    expect(moveTicket(list, 'd1', null, 0, NOW)).toBe(list);
+    expect(moveTicket(list, 'd1', D, 0, NOW)).toBe(list);
 });
 
 test('moveTicket clamps a drop below the pile to just above it', () => {
-  const list = [open('o1', 0), done('d1', 1), done('d2', 2), makeTicket({ id: 'x', date: null, position: 0 })];
-  expect(ids(listOf(moveTicket(list, 'x', D, 3, NOW), D))).toEqual(['o1', 'x', 'd1', 'd2']);
-  expect(ids(listOf(moveTicket(list, 'o1', D, 2, NOW), D))).toEqual(['o1', 'd1', 'd2']);
+    const list = [open('o1', 0), done('d1', 1), done('d2', 2), makeTicket({ id: 'x', date: null, position: 0 })];
+    expect(ids(listOf(moveTicket(list, 'x', D, 3, NOW), D))).toEqual(['o1', 'x', 'd1', 'd2']);
+    expect(ids(listOf(moveTicket(list, 'o1', D, 2, NOW), D))).toEqual(['o1', 'd1', 'd2']);
 });
 
 test('moveTicket into an all-completed list lands at the top', () => {
-  const list = [done('d1', 0), makeTicket({ id: 'x', date: null, position: 0 })];
-  expect(ids(listOf(moveTicket(list, 'x', D, 1, NOW), D))).toEqual(['x', 'd1']);
+    const list = [done('d1', 0), makeTicket({ id: 'x', date: null, position: 0 })];
+    expect(ids(listOf(moveTicket(list, 'x', D, 1, NOW), D))).toEqual(['x', 'd1']);
 });
 
 test('rollover into a day with completed tickets keeps the pile at the bottom', () => {
-  const list = [done('d1', 0), makeTicket({ id: 'late', date: '2026-11-25', position: 0 })];
-  const r = sinkCompleted(rollover(list, D, NOW));
-  expect(ids(listOf(r, D))).toEqual(['late', 'd1']);
+    const list = [done('d1', 0), makeTicket({ id: 'late', date: '2026-11-25', position: 0 })];
+    const r = sinkCompleted(rollover(list, D, NOW));
+    expect(ids(listOf(r, D))).toEqual(['late', 'd1']);
 });
 ```
 
@@ -120,10 +127,12 @@ git commit -m "feat: keep completed tickets at the bottom and lock them in place
 ### Task 2: Store and UI — apply the invariant, disable drag on completed cards
 
 **Files:**
+
 - Modify: `src/app/tasks.store.ts` (`init`, `change`)
 - Modify: `src/app/ticket-list.ts`
 
 **Interfaces:**
+
 - Consumes: `sinkCompleted(tickets: Ticket[]): Ticket[]` and the locked/clamped `moveTicket` from Task 1.
 
 - [ ] **Step 1: Store.** In `init`, `const rolled = sinkCompleted(rollover(loaded, …))` (the existing `rolled !== loaded` check then saves the one-time reorder of old data). In `change`, `const next = sinkCompleted(rollover(fn(before), …))`. Update the class comment: "Every change enforces rollover and the completed-at-bottom order and saves the whole file."
@@ -161,6 +170,7 @@ git commit -m "feat: lock completed cards and keep drops above the completed pil
 ### Task 3: Docs
 
 **Files:**
+
 - Modify: `docs/superpowers/specs/2026-11-26-tasks-app-design.md` — **Cards**: completed cards sit at the bottom of their list and can't be dragged; **Drag and drop**: add "Completed tickets can't be dragged; set the status back first. Open tickets dropped at or below the completed pile land just above it."; **Rollover**: "Completed tickets stay on their original day" → add "and at the bottom of it". Add one line under the title: "Completed-ticket behaviour: see `2026-11-26-completed-tickets-design.md`."
 - Modify: `README.md` intro paragraph — add: "Completed tickets stay on their day, sink to the bottom, and are locked until you change their status."
 - Modify: `docs/style-guide.md` Card row — append: "Completed cards are drag-disabled (`cdk-drag-disabled`) but keep the pointer cursor; they still open on click."

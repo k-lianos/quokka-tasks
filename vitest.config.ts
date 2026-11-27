@@ -5,8 +5,8 @@ import { defineConfig } from 'vitest/config';
 process.env.TZ = 'Europe/Athens';
 
 export default defineConfig({
-  test: {
-    environment: 'node',
-    include: ['src/domain/**/*.test.ts', 'electron/**/*.test.ts'],
-  },
+    test: {
+        environment: 'node',
+        include: ['src/domain/**/*.test.ts', 'electron/**/*.test.ts'],
+    },
 });
