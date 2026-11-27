@@ -115,6 +115,8 @@ export class App {
 
     constructor() {
         void this.store.init();
+        // Lets styles.css adapt the title bar per OS (macOS draws its own window buttons).
+        document.documentElement.dataset['platform'] = window.api.platform;
         // Before the window closes, save whatever is still being typed in the ticket editor.
         window.api.onFlushRequest(() => this.focusView()?.flush() ?? Promise.resolve());
 
