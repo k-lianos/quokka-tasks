@@ -10,7 +10,7 @@ module.exports = {
         asar: true,
         executableName: 'quokka-tasks',
         ignore: p => !KEEP(p),
-        // macOS only (Linux uses the .deb maker's icon below); the extension is added per platform.
+        // packaging/icon.icns on macOS, packaging/icon.ico on Windows (Linux uses the .deb maker's icon below).
         icon: 'packaging/icon',
         appBundleId: 'io.github.k-lianos.quokka-tasks',
         appCategoryType: 'public.app-category.productivity',
@@ -28,7 +28,7 @@ module.exports = {
         },
     },
     makers: [
-        { name: '@electron-forge/maker-zip', platforms: ['linux', 'darwin'] },
+        { name: '@electron-forge/maker-zip', platforms: ['linux', 'darwin', 'win32'] },
         {
             name: '@electron-forge/maker-deb',
             config: { options: { name: 'quokka-tasks', productName: 'Quokka Tasks', categories: ['Office'], icon: 'public/icon.png' } },

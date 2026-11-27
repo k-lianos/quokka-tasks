@@ -31,3 +31,26 @@ jobs:
             - run: npm run format:check
             - run: npm test
             - run: npm run build
+
+    # The app ships for macOS and Windows too: catch platform-specific breakage before a release.
+    # Separate from `ci` so its name, which branch protection requires, stays the same.
+    cross-platform:
+        strategy:
+            fail-fast: false
+            matrix:
+                os: [windows-latest, macos-latest]
+        runs-on: ${{ matrix.os }}
+        steps:
+            - uses: actions/checkout@v4
+
+            - uses: actions/setup-node@v4
+              with:
+                  node-version-file: package.json # reads volta.node
+                  cache: npm
+
+            - run: npm ci
+              env:
+                  ELECTRON_SKIP_BINARY_DOWNLOAD: '1'
+
+            - run: npm test
+            - run: npm run build

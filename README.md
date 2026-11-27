@@ -50,15 +50,25 @@ npx electron .
 ```bash
 npm test           # unit tests (Vitest)
 npm run build      # build UI + main process (also the type check)
-npm run make       # .deb and .zip in out/make/ (on a Mac: a .zip with Quokka Tasks.app)
+npm run make       # .deb and .zip in out/make/ (on a Mac or Windows: that platform's .zip)
 ```
 
 Install the package with `sudo apt install ./out/make/deb/x64/quokka-tasks_*_amd64.deb`.
 
+## Install on Windows
+
+Download `Quokka.Tasks-win32-x64-<version>.zip` from the
+[releases](https://github.com/k-lianos/quokka-tasks/releases), unzip it anywhere (for example
+`%LOCALAPPDATA%\Programs\Quokka Tasks`) and run `quokka-tasks.exe`. Pin it to the taskbar or
+Start to keep it handy. There is no installer: to remove it, delete the folder.
+
+The app isn't code-signed, so on first launch SmartScreen shows "Windows protected your PC".
+Click **More info**, then **Run anyway**.
+
 ## Install on macOS
 
-Download `Quokka Tasks-darwin-arm64-<version>.zip` (Apple Silicon) or
-`Quokka Tasks-darwin-x64-<version>.zip` (Intel) from the
+Download `Quokka.Tasks-darwin-arm64-<version>.zip` (Apple Silicon) or
+`Quokka.Tasks-darwin-x64-<version>.zip` (Intel) from the
 [releases](https://github.com/k-lianos/quokka-tasks/releases), unzip it and move
 `Quokka Tasks.app` to Applications.
 
@@ -71,10 +81,11 @@ The app isn't signed with an Apple Developer ID, so on first launch macOS refuse
 ## CI and releases
 
 GitHub Actions runs `format:check`, the tests and the build on every pull request and on
-pushes to `main` (`.github/workflows/ci.yml`). `main` requires that check to pass.
+pushes to `main` (`.github/workflows/ci.yml`). `main` requires that check to pass. The tests
+and the build also run on Windows and macOS.
 
-Releases are git tags that publish the Linux `.deb` and `.zip` and the macOS `.zip` files
-as a GitHub Release. See
+Releases are git tags that publish the Linux `.deb` and `.zip`, the macOS `.zip` files and
+the Windows `.zip` as a GitHub Release. See
 [`docs/releasing.md`](docs/releasing.md), or run `/release` in Claude Code.
 
 ## Your data

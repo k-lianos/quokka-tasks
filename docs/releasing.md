@@ -2,8 +2,8 @@
 
 A release is a `v*` git tag on `main` that matches `version` in `package.json`. Pushing the
 tag runs `.github/workflows/release.yml`, which runs the tests, builds the Linux `.deb` and
-`.zip` on Ubuntu and the macOS `.zip` files (`arm64` and `x64`) on a macOS runner, and
-publishes them all as a GitHub Release with auto-generated notes.
+`.zip` on Ubuntu, the macOS `.zip` files (`arm64` and `x64`) on a macOS runner and the
+Windows `x64` `.zip` on a Windows runner, and publishes them all as a GitHub Release with auto-generated notes.
 
 In Claude Code, `/release` (optionally `/release 0.2.0` or `/release minor`) runs this whole
 procedure for you.
@@ -61,13 +61,16 @@ It fails at once if the tag doesn't match `package.json`.
 ### 4. Check the release and install it
 
 ```bash
-gh release view v0.2.0          # a .deb, a linux-x64 .zip, a darwin-arm64 .zip and a darwin-x64 .zip
+gh release view v0.2.0          # a .deb and linux-x64, darwin-arm64, darwin-x64 and win32-x64 .zips
 gh release download v0.2.0 --pattern '*.deb' --dir /tmp/quokka
 sudo apt install /tmp/quokka/quokka-tasks_0.2.0_amd64.deb
 ```
 
 On a Mac, download the `darwin` zip for its architecture and open the app (it's unsigned:
 see "Install on macOS" in the README).
+
+On Windows, unzip the `win32` zip and run `quokka-tasks.exe` (unsigned: SmartScreen asks
+once, see "Install on Windows" in the README).
 
 The macOS builds are ad-hoc signed only (no Apple Developer ID, no notarisation). The
 `postPackage` hook in `forge.config.js` does that signing, so it runs only on a Mac.

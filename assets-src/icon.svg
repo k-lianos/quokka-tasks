@@ -1,7 +1,9 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
   <!-- Quokka Tasks app icon: the header's Q mark (cyan) on a navy rounded square.
        Export: inkscape assets-src/icon.svg -w 512 -h 512 -o public/icon.png
-               magick public/icon.png -define icon:auto-resize=256,64,48,32,16 public/favicon.ico -->
+               magick public/icon.png -define icon:auto-resize=256,64,48,32,16 public/favicon.ico
+               inkscape assets-src/icon.svg -w 256 -h 256 -o /tmp/icon-256.png
+               magick /tmp/icon-256.png -define icon:auto-resize=256,64,48,32,24,16 packaging/icon.ico (Windows .exe) -->
   <rect width="512" height="512" rx="112" fill="#070b12"/>
   <g transform="translate(79 79.6) scale(10.5)">
     <path d="M16 3a13 13 0 1 0 6.9 24l3.6 3.6 4.2-4.2-3.4-3.4A13 13 0 0 0 16 3zm0 7a6 6 0 1 1 0 12 6 6 0 0 1 0-12z" fill="#00e1f0"/>

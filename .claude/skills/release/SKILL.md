@@ -1,6 +1,6 @@
 ---
 name: release
-description: Cut a release of Quokka Tasks end to end (version bump PR, tag, GitHub Release with the Linux .deb + .zip and the macOS .zip files).
+description: Cut a release of Quokka Tasks end to end (version bump PR, tag, GitHub Release with the Linux .deb + .zip, the macOS .zip files and the Windows .zip).
 argument-hint: '[version | patch | minor | major]'
 disable-model-invocation: true
 ---
@@ -38,7 +38,7 @@ Follow steps 1–3 of `docs/releasing.md` with the chosen version. Wait on CI wi
 Done means all three are observed, not assumed:
 
 - the release workflow run for the tag concluded `success`
-- `gh release view v<version>` lists exactly one `.deb` and three `.zip` files (`linux-x64`, `darwin-arm64`, `darwin-x64`)
+- `gh release view v<version>` lists exactly one `.deb` and four `.zip` files (`linux-x64`, `darwin-arm64`, `darwin-x64`, `win32-x64`)
 - local `main` is at the merged bump commit
 
 ## 5. Report
