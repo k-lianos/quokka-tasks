@@ -60,14 +60,8 @@ Install the package with `sudo apt install ./out/make/deb/x64/quokka-tasks_*_amd
 GitHub Actions runs `format:check`, the tests and the build on every pull request and on
 pushes to `main` (`.github/workflows/ci.yml`). `main` requires that check to pass.
 
-To release, bump `version` in `package.json`, merge it, then tag and push:
-
-```bash
-git tag v0.2.0 && git push origin v0.2.0
-```
-
-`.github/workflows/release.yml` checks the tag matches `package.json`, runs `npm run make`
-and attaches the `.deb` and `.zip` to a GitHub Release.
+Releases are git tags that publish the `.deb` and `.zip` as a GitHub Release. See
+[`docs/releasing.md`](docs/releasing.md), or run `/release` in Claude Code.
 
 ## Your data
 
