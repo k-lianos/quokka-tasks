@@ -36,6 +36,11 @@ test('createTicket appends a pending ticket at the bottom', () => {
     });
 });
 
+test('createTicket sets priority normal, empty estimate and link', () => {
+    const r = createTicket(all, { id: 'n', title: 'New', date: null, now: NOW });
+    expect(r.find(t => t.id === 'n')).toMatchObject({ priority: 'normal', estimate: '', link: '' });
+});
+
 test('createTicket rejects whitespace-only titles', () => {
     expect(createTicket(all, { id: 'n', title: '   ', date: null, now: NOW })).toBe(all);
 });

@@ -11,10 +11,10 @@ beforeEach(async () => {
     dir = await fs.mkdtemp(path.join(os.tmpdir(), 'qt-'));
 });
 
-const data = (...ids: string[]): DataFile => ({ version: 1, tickets: ids.map(id => makeTicket({ id })) });
+const data = (...ids: string[]): DataFile => ({ version: 2, tickets: ids.map(id => makeTicket({ id })) });
 
 test('missing file loads empty with no notice', async () => {
-    expect(await createStore(dir).load()).toEqual({ data: { version: 1, tickets: [] }, notice: null });
+    expect(await createStore(dir).load()).toEqual({ data: { version: 2, tickets: [] }, notice: null });
 });
 
 test('save then load round-trips and leaves no temp file', async () => {
@@ -43,7 +43,7 @@ test('concurrent saves are serialized; last one wins', async () => {
 
 test('a failed save does not block later saves', async () => {
     const s = createStore(dir);
-    const bad = { version: 1, tickets: [] } as unknown as DataFile;
+    const bad = { version: 2, tickets: [] } as unknown as DataFile;
     (bad as unknown as { self: unknown }).self = bad; // circular → JSON.stringify throws
     await expect(s.save(bad)).rejects.toThrow();
     await s.save(data('after'));
@@ -65,7 +65,7 @@ test('whenIdle resolves only after queued saves have reached the disk', async ()
 
 test('whenIdle resolves even if the last save failed', async () => {
     const s = createStore(dir);
-    const bad = { version: 1, tickets: [] } as unknown as DataFile;
+    const bad = { version: 2, tickets: [] } as unknown as DataFile;
     (bad as unknown as { self: unknown }).self = bad;
     s.save(bad).catch(() => undefined);
     await expect(s.whenIdle()).resolves.toBeUndefined();

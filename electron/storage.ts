@@ -39,8 +39,8 @@ export function createStore(dir: string): Store {
                 if ((e as NodeJS.ErrnoException).code === 'ENOENT') return { data: emptyDataFile(), notice: null };
                 throw e;
             }
-            const data = parseDataFile(text);
-            if (data) return { data, notice: null };
+            const parsed = parseDataFile(text);
+            if (parsed) return { data: parsed.data, notice: null };
 
             const stamp = new Date().toISOString().replace(/[:.]/g, '-');
             const name = `tasks.corrupt-${stamp}.json`;

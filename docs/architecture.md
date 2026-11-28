@@ -25,11 +25,12 @@ src/app/      Angular UI (renderer)                    ◄───────�
 
 ## Data model
 
-`src/shared/types.ts` defines it. Everything is one `DataFile`, `{ version: 1, tickets: Ticket[] }`. A `Ticket` has:
+`src/shared/types.ts` defines it. Everything is one `DataFile`, `{ version: 2, tickets: Ticket[] }`. A `Ticket` has:
 
 - `status`: `pending`, `in_progress` or `completed`.
 - `date`: a local calendar date `YYYY-MM-DD`, or `null` for the backlog.
 - `position`: its 0-based index within its list (its day, or the backlog). 0 is the highest priority.
+- `priority` (`high`, `normal` or `low`), `estimate` (free text) and `link` (a URL as typed): notes shown only in the focus view. `priority` doesn't affect list order. Empty `estimate`/`link` are `''`.
 
 Two rules hold after every change:
 
@@ -40,7 +41,11 @@ Two rules hold after every change:
 
 `tasks.json` is plain JSON on the user's disk, and it outlives every app version. A user can skip any number of releases and install the latest, so every release must read every data file any earlier release wrote, with no data loss. The `version` field is how the app tells the shapes apart.
 
-Today only version 1 exists, so there are no migrations yet. `parseDataFile` accepts only `version: 1`. Anything else, including a file from a newer app, is treated as corrupt: it is kept as `tasks.corrupt-<timestamp>.json` and the app starts empty.
+The current version is 2 (`CURRENT_VERSION` in `domain/migrate.ts`). `parseDataFile` parses the JSON, runs `migrate` (the step chain, `STEPS` in `migrate.ts`) up to the current version, then validates the result as the current version. It also returns the version found on disk, so storage knows a migration happened. A file with a missing or unknown version, including one from a newer app, is treated as corrupt: it is kept as `tasks.corrupt-<timestamp>.json` and the app starts empty.
+
+Shipped migrations:
+
+- **1 → 2:** sets `priority: 'normal'`, `estimate: ''` and `link: ''` on every ticket.
 
 Any change to the stored shape bumps `version` and ships a migration in the same PR. A shape change is anything an older file wouldn't satisfy or an older app would misread: a new required field, a removed or renamed field, a new allowed value, a changed meaning or format. The rules:
 
