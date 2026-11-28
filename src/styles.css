@@ -145,6 +145,12 @@ button {
 .button-danger:hover {
     background: color-mix(in srgb, var(--color-danger) 25%, transparent);
 }
+.button:disabled,
+.button:disabled:hover {
+    background: var(--color-surface-raised);
+    color: var(--color-text-muted);
+    cursor: not-allowed;
+}
 .icon-button {
     display: grid;
     place-items: center;
