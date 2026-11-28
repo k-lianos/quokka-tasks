@@ -70,3 +70,74 @@ test('whenIdle resolves even if the last save failed', async () => {
     s.save(bad).catch(() => undefined);
     await expect(s.whenIdle()).resolves.toBeUndefined();
 });
+
+const v1Text = JSON.stringify(
+    {
+        version: 1,
+        tickets: [
+            {
+                id: 'a',
+                title: 'A',
+                description: '',
+                status: 'pending',
+                date: null,
+                position: 0,
+                createdAt: '2026-01-01T00:00:00.000Z',
+                updatedAt: '2026-01-01T00:00:00.000Z',
+            },
+        ],
+    },
+    null,
+    2,
+);
+const tasksFile = () => path.join(dir, 'tasks.json');
+const backups = async () => (await fs.readdir(dir)).filter(f => /^tasks\.v1\.backup.*\.json$/.test(f)).sort();
+
+test('a v1 file is backed up byte-for-byte and saved as v2', async () => {
+    await fs.writeFile(tasksFile(), v1Text);
+    const r = await createStore(dir).load();
+    expect(r.data.version).toBe(2);
+    expect(r.data.tickets[0]).toMatchObject({ id: 'a', priority: 'normal', estimate: '', link: '' });
+    expect(await backups()).toEqual(['tasks.v1.backup.json']);
+    expect(await fs.readFile(path.join(dir, 'tasks.v1.backup.json'), 'utf8')).toBe(v1Text);
+    expect(JSON.parse(await fs.readFile(tasksFile(), 'utf8')).version).toBe(2);
+});
+
+test('a second load makes no new backup', async () => {
+    await fs.writeFile(tasksFile(), v1Text);
+    await createStore(dir).load();
+    await createStore(dir).load();
+    expect(await backups()).toEqual(['tasks.v1.backup.json']);
+});
+
+test('an existing backup is never overwritten', async () => {
+    await fs.writeFile(path.join(dir, 'tasks.v1.backup.json'), 'old');
+    await fs.writeFile(tasksFile(), v1Text);
+    await createStore(dir).load();
+    expect(await fs.readFile(path.join(dir, 'tasks.v1.backup.json'), 'utf8')).toBe('old');
+    const stamped = (await backups()).filter(f => /^tasks\.v1\.backup-.+\.json$/.test(f));
+    expect(stamped).toHaveLength(1);
+    expect(await fs.readFile(path.join(dir, stamped[0]), 'utf8')).toBe(v1Text);
+});
+
+test('a v2 file creates no backup', async () => {
+    await createStore(dir).save(data('a'));
+    await createStore(dir).load();
+    expect(await fs.readdir(dir)).toEqual(['tasks.json']);
+});
+
+test('a future-version file takes the corrupt path and creates no backup', async () => {
+    await fs.writeFile(tasksFile(), JSON.stringify({ version: 3, tickets: [] }));
+    const r = await createStore(dir).load();
+    expect(r.notice).toContain('tasks.corrupt-');
+    expect(await backups()).toEqual([]);
+});
+
+test('a failed save after migration still returns the data', async () => {
+    await fs.writeFile(tasksFile(), v1Text);
+    await fs.mkdir(path.join(dir, 'tasks.json.tmp')); // the temp-file open fails; the backup doesn't
+    const r = await createStore(dir).load();
+    expect(r.data.version).toBe(2);
+    expect(await backups()).toEqual(['tasks.v1.backup.json']);
+    expect(await fs.readFile(tasksFile(), 'utf8')).toBe(v1Text);
+});
