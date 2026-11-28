@@ -241,10 +241,13 @@ export class FocusView {
         if (DUE_TIME.test(input.value)) this.dueTime.set(input.value);
     }
 
-    /** On leaving the field: empty means no time; anything else that isn't a full time restores the draft. */
+    /**
+     * On leaving the field: a half-filled time (Chromium reports '' with validity.badInput) restores the
+     * draft; a fully cleared field means no time.
+     */
     protected onTimeLeft(input: HTMLInputElement): void {
-        if (input.value === '') this.dueTime.set(null);
-        else if (!DUE_TIME.test(input.value)) input.value = this.dueTime() ?? '';
+        if (input.validity.badInput || (input.value !== '' && !DUE_TIME.test(input.value))) input.value = this.dueTime() ?? '';
+        else if (input.value === '') this.dueTime.set(null);
     }
 
     protected setBacklog(backlog: boolean): void {
