@@ -16,12 +16,15 @@ test.beforeEach(async ({ quokka: { app, page } }) => {
 test('Open shows only for http(s)', async ({ quokka: { page } }) => {
     const link = editor(page).getByLabel('Link', { exact: true });
     const open = editor(page).getByRole('link', { name: 'Open' });
+    // Each "absent" check follows a visible Open, so it sees a real re-render, not a stale DOM.
+    await link.fill('https://example.com/a');
+    await expect(open).toBeVisible();
     await link.fill('notaurl');
-    await expect(open).toHaveCount(0);
-    await link.fill('ftp://x');
     await expect(open).toHaveCount(0);
     await link.fill('https://example.com/a');
     await expect(open).toBeVisible();
+    await link.fill('ftp://x');
+    await expect(open).toHaveCount(0);
 });
 
 test('Open uses the draft and goes to the system browser', async ({ quokka: { app, page } }) => {

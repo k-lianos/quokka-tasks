@@ -21,8 +21,9 @@ test.describe('an overdue ticket', () => {
         await expect.poll(() => find(readData, 'a')).toMatchObject({ date: today, position: 1 });
     });
 
-    test('a completed past ticket stays put', async ({ quokka: { page, readData } }) => {
-        await expect(page.getByRole('region', { name: 'Now' })).toContainText('Overdue');
+    test('a completed past ticket stays put', async ({ quokka: { readData, today } }) => {
+        // Wait for the rollover save itself, so the check below reads the file that save wrote.
+        await expect.poll(() => find(readData, 'o')).toMatchObject({ date: today });
         expect(await find(readData, 'd')).toMatchObject({ date: day(-2) });
     });
 });

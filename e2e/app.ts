@@ -48,7 +48,8 @@ export async function launch(dir: string): Promise<{ app: ElectronApplication; p
     const app = await _electron.launch({
         args: ['.', '--no-sandbox', '--lang=en-GB', `--user-data-dir=${dir}`],
         cwd: repoRoot,
-        env: { ...process.env, TZ: 'Europe/Athens', LANG: 'en_GB.UTF-8' },
+        // Chromium on Linux reads LANGUAGE before --lang and LANG, so pin every locale variable.
+        env: { ...process.env, TZ: 'Europe/Athens', LANG: 'en_GB.UTF-8', LANGUAGE: 'en_GB', LC_ALL: 'en_GB.UTF-8' },
     });
     const page = await app.firstWindow();
     await page.getByRole('button', { name: 'Today' }).waitFor();
