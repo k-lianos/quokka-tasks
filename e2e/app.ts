@@ -125,3 +125,22 @@ export async function addTicket(where: Locator, title: string): Promise<void> {
     await input.fill(title);
     await input.press('Enter');
 }
+
+/**
+ * Drag `from` onto `to` with real mouse moves: CDK drag and drop starts only after the pointer
+ * travels a few pixels and tracks intermediate moves, which a one-shot dragTo doesn't give it.
+ * Dropping onto a card takes that card's place: the card and the ones after it move down.
+ */
+export async function drag(page: Page, from: Locator, to: Locator): Promise<void> {
+    const a = await from.boundingBox();
+    const b = await to.boundingBox();
+    if (!a || !b) throw new Error('drag: source or target is not visible');
+    const x = b.x + b.width / 2;
+    const y = b.y + b.height / 2;
+    await page.mouse.move(a.x + a.width / 2, a.y + a.height / 2);
+    await page.mouse.down();
+    await page.mouse.move(a.x + a.width / 2 + 10, a.y + a.height / 2 + 10, { steps: 5 });
+    await page.mouse.move(x, y, { steps: 20 });
+    await page.mouse.move(x, y + 1, { steps: 2 });
+    await page.mouse.up();
+}
