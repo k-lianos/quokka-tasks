@@ -83,7 +83,7 @@ Angular with standalone components, signals and no zone.js. Templates are inline
 
 ### Routing
 
-The router uses hash URLs: `#/day/2026-11-26` and `#/week/2026-11-23`, where a week is identified by its Monday. Path URLs break on reload under `file://`. Guards in `app.routes.ts` send invalid dates to today and snap a week URL to its Monday. Anything else redirects to today's Day view, which is the start screen. View arithmetic (next, previous, today, switching between day and week, following today across midnight) is in `domain/views.ts`.
+The router uses hash URLs: `#/day/2026-11-26` and `#/week/2026-11-23`, where a week is identified by its Monday. Path URLs break on reload under `file://`. `index.html` has no `<base>` element: the router resolves each new hash URL against it, so `<base href="./">` dropped `index.html` from the URL and a reload showed an empty window. Guards in `app.routes.ts` send invalid dates to today and snap a week URL to its Monday. Anything else redirects to today's Day view, which is the start screen. View arithmetic (next, previous, today, switching between day and week, following today across midnight) is in `domain/views.ts`.
 
 ### Components
 
@@ -92,6 +92,16 @@ The router uses hash URLs: `#/day/2026-11-26` and `#/week/2026-11-23`, where a w
 - **`WeekPage`**: seven `TicketList`s, Monday to Sunday.
 - **`TicketList`** and **`TicketCard`**: a list of draggable cards with completed cards locked at the bottom, plus **`AddTicket`** for creating tickets. `TicketCard`, `DayRow` and `NowBlock` show a ticket's due time (`14:00`, always 24-hour) next to its status when it has one. The backlog is a `TicketList` with date `null`.
 - **`FocusView`**: the modal ticket editor. Title, description, status, date, due time, priority, estimate and link are drafts until **Save** (disabled while the title is empty); closing the modal or the window without saving discards them. The date is a native date input, a native time input for the due time, and a "No date (backlog)" checkbox (which also clears the time). Both inputs take only complete values while typing and settle when focus leaves them, because Chromium reports partial input as a change. Past days are allowed only for completed tickets (`isDateAllowed`), so a draft that breaks the rule snaps to today with a note. Save goes through `saveTicketEdits` (`domain/tickets.ts`), which moves a ticket whose date changed to the end of the new list's open tickets and enforces the same rule. The link field shows an **Open** link (`target="_blank"`) only when the draft is an `http(s)` URL; the main process opens it in the system browser. The modal also shows the created and updated dates. Delete asks first through **`ConfirmDialog`**.
+
+## Testing
+
+- **Unit tests (Vitest)** cover the rules: `src/domain/**/*.test.ts` and `electron/**/*.test.ts`, with `TZ` pinned to `Europe/Athens` (`vitest.config.ts`).
+- **End-to-end tests (Playwright)** in `e2e/*.spec.ts` drive the built app with `_electron.launch`: main process, preload, IPC, storage and UI together. `npm run test:e2e` type-checks them (`tsconfig.e2e.json`) and runs them against the current `dist/`, so build first.
+- **The fixture** (`e2e/app.ts`) gives each test a fresh temp directory passed as `--user-data-dir`, writes the test's seed as `tasks.json`, and launches with `--no-sandbox` and `--lang=en-GB` (a 24-hour time input everywhere). It exposes the window and `readData()` for what was saved. Real data is never touched; a test asserts the app's data path is the temp dir.
+- **Dates** in seeds are relative to the real today (`day(n)`, `weekOf(n)`), and the tests and app share `TZ=Europe/Athens`. Past days inside a week come from the previous week, so results don't depend on the weekday. A test that crosses midnight fails with a clear message. Only the midnight-rollover test fakes the clock (`clock.install`).
+- **Selectors** are roles, accessible names and labels, never CSS classes. Lists are named regions: a week column by its heading (`Mon 23`), `Backlog`, and the Day sections `Up next`, `Planned` and `Done`.
+- **Saves are async**: disk checks poll (`expect.poll`). There are no retries: a flaky test is a bug to fix.
+- **CI** runs them in the `e2e` job on Linux under `xvfb-run`.
 
 ## Build and packaging
 

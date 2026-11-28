@@ -17,11 +17,12 @@ Tooling: TypeScript, Vitest, npm (public registry via the project `.npmrc`).
 - `npm run serve` + `npm run dev` (two terminals) — run against the Angular dev server with live reload.
 - `start` and `dev` pass `--no-sandbox` on purpose: Ubuntu's AppArmor blocks the Chromium sandbox for the Electron binary in `node_modules` (see README). Don't remove it. Only the packaged `.deb` runs sandboxed, so check sandbox-sensitive changes there.
 - `npm test` — Vitest unit tests (`src/domain/**/*.test.ts`, `electron/**/*.test.ts`).
+- `npm run test:e2e` — Playwright end-to-end tests (`e2e/*.spec.ts`) against the built app: run `npm run build` first. Each test launches Electron on its own scratch data directory (see "Testing" in `docs/architecture.md`).
 - `npm run make` — build and package (`.deb` + zip in `out/make/`).
 - `npm run format` — format everything with Prettier. A husky pre-commit hook runs lint-staged, which formats staged files with Prettier automatically.
 - `npm run format:check` — check formatting without writing (CI runs this).
-- CI (`.github/workflows/ci.yml`) runs `format:check`, `npm test` and `npm run build` on PRs and pushes to `main`. Releasing (version bump PR, `v*` tag, `release.yml` publishes the `.deb` + zip): follow `docs/releasing.md`; the user-invoked `/release` skill runs it end to end.
-- Standard verification: `npm test && npm run build`. There is no linter yet; strict TypeScript and Angular strict templates are the static check.
+- CI (`.github/workflows/ci.yml`) runs `format:check`, `npm test` and `npm run build` on PRs and pushes to `main`, and a separate `e2e` job runs `npm run test:e2e` under xvfb. Releasing (version bump PR, `v*` tag, `release.yml` publishes the `.deb` + zip): follow `docs/releasing.md`; the user-invoked `/release` skill runs it end to end.
+- Standard verification: `npm test && npm run build && npm run test:e2e`. There is no linter yet; strict TypeScript and Angular strict templates are the static check.
 
 ## Code rules
 
@@ -37,6 +38,7 @@ Tooling: TypeScript, Vitest, npm (public registry via the project `.npmrc`).
 
 - For any non-trivial change, propose a plan and wait for approval before writing code.
 - Ask before adding any new dependency, and say why it's needed and what the alternatives are.
+- A plan's checks of the running app go in as e2e tests. Keep a manual check only for what a test can't judge (how something looks and feels), and say why.
 
 ## Git
 
