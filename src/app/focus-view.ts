@@ -5,6 +5,9 @@ import { STATUS_LABEL, STATUSES, type Status, type Ticket } from '../shared/type
 import { ConfirmDialog } from './confirm-dialog';
 import { TasksStore } from './tasks.store';
 
+/** A full date as the native input reports it; partial typing can yield years like 0002. */
+const isCompleteDate = (value: string): boolean => value >= '1000-01-01';
+
 /** Modal editor for one ticket. Edits are drafts until Save; closing without saving discards them. */
 @Component({
     selector: 'app-focus-view',
@@ -58,7 +61,8 @@ import { TasksStore } from './tasks.store';
                             [value]="date() ?? ''"
                             [attr.min]="minDate()"
                             [disabled]="date() === null"
-                            (change)="onDateInput(dateInput)"
+                            (change)="onDateTyped(dateInput)"
+                            (blur)="onDateLeft(dateInput)"
                         />
                         <label class="checkbox">
                             <input type="checkbox" [checked]="date() === null" (change)="setBacklog($any($event.target).checked)" />
@@ -142,17 +146,26 @@ export class FocusView {
         if (!isDateAllowed(this.date(), status, this.store.today())) this.snapToToday();
     }
 
-    /** Clearing the native input emits '' — keep the previous draft; only the checkbox means backlog. */
-    protected onDateInput(input: HTMLInputElement): void {
+    /**
+     * Chromium fires 'change' on every keystroke that forms a date (typing "1" for December commits
+     * January first; a year passes through 0002, 0020...). So while typing, take only complete,
+     * allowed values and leave the input alone otherwise; onDateLeft settles the rest.
+     */
+    protected onDateTyped(input: HTMLInputElement): void {
         const value = input.value;
-        if (!value) {
-            input.value = this.date() ?? '';
-            return;
-        }
-        if (isDateAllowed(value, this.status(), this.store.today())) {
+        if (isCompleteDate(value) && isDateAllowed(value, this.status(), this.store.today())) {
             this.date.set(value);
             this.dateNote.set(false);
-        } else {
+        }
+    }
+
+    /** On leaving the field: an empty or partial value restores the draft (only the checkbox means
+     *  backlog); a date the status doesn't allow snaps to today with the note. */
+    protected onDateLeft(input: HTMLInputElement): void {
+        const value = input.value;
+        if (!isCompleteDate(value)) {
+            input.value = this.date() ?? '';
+        } else if (!isDateAllowed(value, this.status(), this.store.today())) {
             this.snapToToday();
             input.value = this.store.today();
         }
