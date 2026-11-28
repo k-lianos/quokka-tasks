@@ -26,6 +26,7 @@ Tooling: TypeScript, Vitest, npm (public registry via the project `.npmrc`).
 ## Code rules
 
 - Respect the layer boundaries in `docs/architecture.md`: `src/domain/` and `src/shared/` import nothing from Angular, Electron, Node or the DOM.
+- Changing the shape of `tasks.json` (`DataFile`, `Ticket`): bump `version` and ship a migration in the same change, so a user on any older version upgrades without losing data. Follow "Versioning and migrations" in `docs/architecture.md`.
 - All dependencies are devDependencies.
 - All styles live in `src/styles.css`.
 - Keep hash URLs in the router (see `docs/architecture.md`).
