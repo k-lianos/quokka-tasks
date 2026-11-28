@@ -1,9 +1,9 @@
 import { app, BrowserWindow, ipcMain, shell, type IpcMainEvent, type IpcMainInvokeEvent } from 'electron';
 import * as path from 'node:path';
 import { pathToFileURL } from 'node:url';
-import { isOpenableUrl } from '../src/domain/links';
 import { IPC } from '../src/shared/api';
 import type { DataFile } from '../src/shared/types';
+import { openInBrowser } from './links';
 import { createStore, type Store } from './storage';
 
 const DEV_URL = 'http://localhost:4200';
@@ -79,7 +79,7 @@ function createWindow(store: Store): BrowserWindow {
     // Lock-down: no new app windows and no navigation away from the app. An http(s) link opened from
     // the UI (target="_blank") goes to the system browser; anything else is dropped.
     win.webContents.setWindowOpenHandler(({ url }) => {
-        if (isOpenableUrl(url)) void shell.openExternal(url);
+        openInBrowser(url, u => shell.openExternal(u));
         return { action: 'deny' };
     });
     win.webContents.on('will-navigate', (event, url) => {

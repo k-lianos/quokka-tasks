@@ -3,15 +3,14 @@ import { expect, test } from 'vitest';
 import { CURRENT_VERSION, migrate } from './migrate';
 import { parseDataFile } from './validate';
 
-const v1Text = readFileSync(new URL('./fixtures/tasks.v1.json', import.meta.url), 'utf8');
+const fixture = (name: string) => readFileSync(new URL(`./fixtures/${name}`, import.meta.url), 'utf8');
+const v1Text = fixture('tasks.v1.json');
+/** The expected result of migrating tasks.v1.json, committed so the 1 -> 2 step can't drift unnoticed. */
+const expectedV2 = JSON.parse(fixture('tasks.v1.migrated.json'));
 const defaults = { priority: 'normal', estimate: '', link: '' };
 
-test('the v1 fixture migrates to v2 keeping every field', () => {
-    const v1 = JSON.parse(v1Text);
-    expect(migrate(JSON.parse(v1Text))).toEqual({
-        fromVersion: 1,
-        file: { version: 2, tickets: v1.tickets.map((t: object) => ({ ...t, ...defaults })) },
-    });
+test('the v1 fixture migrates to the committed expected v2 file', () => {
+    expect(migrate(JSON.parse(v1Text))).toEqual({ fromVersion: 1, file: expectedV2 });
 });
 
 test('the v1 fixture parses all the way to the current version', () => {
@@ -19,8 +18,7 @@ test('the v1 fixture parses all the way to the current version', () => {
     expect(parsed).not.toBeNull();
     expect(parsed.fromVersion).toBe(1);
     expect(parsed.data.version).toBe(CURRENT_VERSION);
-    expect(parsed.data.tickets).toHaveLength(5);
-    expect(parsed.data.tickets.map(t => t.updatedAt)).toEqual(JSON.parse(v1Text).tickets.map((t: { updatedAt: string }) => t.updatedAt));
+    expect(parsed.data).toEqual(expectedV2);
 });
 
 test('stray v1 keys are overwritten by the defaults', () => {

@@ -80,13 +80,18 @@ const stamp = (): string => new Date().toISOString().replace(/[:.]/g, '-');
 /** Write `tasks.v<n>.backup.json`, or a timestamped name if that exists. Never overwrites a backup. */
 async function writeBackup(dir: string, version: number, text: string): Promise<void> {
     const write = async (name: string): Promise<void> => {
-        const handle = await fs.open(path.join(dir, name), 'wx');
+        const file = path.join(dir, name);
+        const handle = await fs.open(file, 'wx');
         try {
             await handle.writeFile(text, 'utf8');
             await handle.sync();
-        } finally {
-            await handle.close();
+        } catch (e) {
+            // Never leave a partial file under a backup name: the next launch would take the name.
+            await handle.close().catch(() => undefined);
+            await fs.unlink(file).catch(() => undefined);
+            throw e;
         }
+        await handle.close();
     };
     try {
         await write(`tasks.v${version}.backup.json`);

@@ -1,0 +1,70 @@
+{
+    "version": 2,
+    "tickets": [
+        {
+            "id": "6f1c2a3e-0b1d-4c55-9a77-1e2f3a4b5c60",
+            "title": "Read the Electron security checklist",
+            "description": "https://www.electronjs.org/docs/latest/tutorial/security\nFocus on sandbox + contextIsolation.",
+            "status": "pending",
+            "date": null,
+            "position": 0,
+            "createdAt": "2026-11-20T08:15:00.000Z",
+            "updatedAt": "2026-11-21T10:02:13.511Z",
+            "priority": "normal",
+            "estimate": "",
+            "link": ""
+        },
+        {
+            "id": "8a9b0c1d-2e3f-4a5b-8c6d-7e8f9a0b1c2d",
+            "title": "Write rollover tests",
+            "description": "",
+            "status": "pending",
+            "date": "2026-11-26",
+            "position": 0,
+            "createdAt": "2026-11-24T09:00:00.000Z",
+            "updatedAt": "2026-11-26T07:30:41.004Z",
+            "priority": "normal",
+            "estimate": "",
+            "link": ""
+        },
+        {
+            "id": "1b2c3d4e-5f6a-4b7c-9d8e-0f1a2b3c4d5e",
+            "title": "Set up CI",
+            "description": "format:check, test, build",
+            "status": "completed",
+            "date": "2026-11-26",
+            "position": 1,
+            "createdAt": "2026-11-23T14:45:10.000Z",
+            "updatedAt": "2026-11-26T16:20:00.000Z",
+            "priority": "normal",
+            "estimate": "",
+            "link": ""
+        },
+        {
+            "id": "c0ffee00-1234-4abc-8def-0123456789ab",
+            "title": "Package the .deb",
+            "description": "",
+            "status": "in_progress",
+            "date": "2026-11-30",
+            "position": 0,
+            "createdAt": "2026-11-25T11:11:11.111Z",
+            "updatedAt": "2026-11-27T18:05:59.999Z",
+            "priority": "normal",
+            "estimate": "",
+            "link": ""
+        },
+        {
+            "id": "deadbeef-0000-4000-8000-000000000001",
+            "title": "Sketch the data model",
+            "description": "Ticket: title, description, status, date, position.",
+            "status": "completed",
+            "date": "2026-11-02",
+            "position": 0,
+            "createdAt": "2026-11-01T20:00:00.000Z",
+            "updatedAt": "2026-11-02T21:30:00.000Z",
+            "priority": "normal",
+            "estimate": "",
+            "link": ""
+        }
+    ]
+}

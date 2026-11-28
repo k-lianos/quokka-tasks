@@ -1,7 +1,29 @@
 import * as fs from 'node:fs/promises';
 import * as os from 'node:os';
 import * as path from 'node:path';
-import { beforeEach, expect, test } from 'vitest';
+import { beforeEach, expect, test, vi } from 'vitest';
+
+// Lets a test make the next backup write fail after the file was created (like a full disk).
+const failBackupWrite = vi.hoisted(() => ({ next: false }));
+vi.mock('node:fs/promises', async importOriginal => {
+    const real = await importOriginal<typeof import('node:fs/promises')>();
+    return {
+        ...real,
+        open: async (...args: Parameters<typeof real.open>) => {
+            const handle = await real.open(...args);
+            if (!failBackupWrite.next || !String(args[0]).includes('.backup')) return handle;
+            failBackupWrite.next = false;
+            return {
+                writeFile: async () => {
+                    await handle.writeFile('partial');
+                    throw Object.assign(new Error('no space'), { code: 'ENOSPC' });
+                },
+                sync: () => handle.sync(),
+                close: () => handle.close(),
+            };
+        },
+    };
+});
 import { makeTicket } from '../src/domain/testUtils';
 import type { DataFile } from '../src/shared/types';
 import { createStore } from './storage';
@@ -140,4 +162,14 @@ test('a failed save after migration still returns the data', async () => {
     expect(r.data.version).toBe(2);
     expect(await backups()).toEqual(['tasks.v1.backup.json']);
     expect(await fs.readFile(tasksFile(), 'utf8')).toBe(v1Text);
+});
+
+test('a failed backup write leaves no partial backup and fails the load', async () => {
+    await fs.writeFile(tasksFile(), v1Text);
+    failBackupWrite.next = true;
+    await expect(createStore(dir).load()).rejects.toThrow('no space');
+    expect(await backups()).toEqual([]);
+    expect(await fs.readFile(tasksFile(), 'utf8')).toBe(v1Text);
+    await createStore(dir).load(); // space freed: the backup goes to the canonical name
+    expect(await backups()).toEqual(['tasks.v1.backup.json']);
 });
