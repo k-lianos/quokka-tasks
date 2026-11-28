@@ -41,6 +41,10 @@ test('createTicket sets priority normal, empty estimate and link', () => {
     expect(r.find(t => t.id === 'n')).toMatchObject({ priority: 'normal', estimate: '', link: '' });
 });
 
+test('createTicket sets dueTime null', () => {
+    expect(createTicket(all, { id: 'n', title: 'New', date: null, now: NOW }).find(t => t.id === 'n')!.dueTime).toBeNull();
+});
+
 test('createTicket rejects whitespace-only titles', () => {
     expect(createTicket(all, { id: 'n', title: '   ', date: null, now: NOW })).toBe(all);
 });
@@ -190,6 +194,7 @@ const edits = (t: Ticket, e: Partial<TicketEdits> = {}): TicketEdits => ({
     priority: t.priority,
     estimate: t.estimate,
     link: t.link,
+    dueTime: t.dueTime,
     ...e,
 });
 
@@ -246,4 +251,35 @@ test('saveTicketEdits with only an estimate change keeps the position', () => {
     const r = saveTicketEdits(all, 'b', edits(b, { estimate: '30 min' }), TODAY, NOW);
     expect(ids(listOf(r, TODAY))).toEqual(['a', 'b', 'c']);
     expect(r.find(t => t.id === 'b')).toMatchObject({ estimate: '30 min', updatedAt: NOW });
+});
+
+test('saveTicketEdits stores a due time', () => {
+    const r = saveTicketEdits(all, 'a', edits(a, { dueTime: '14:00' }), TODAY, NOW);
+    expect(r.find(t => t.id === 'a')).toMatchObject({ dueTime: '14:00', updatedAt: NOW });
+});
+
+test('saveTicketEdits drops the due time for the backlog', () => {
+    const r = saveTicketEdits(all, 'a', edits(a, { date: null, dueTime: '14:00' }), TODAY, NOW);
+    expect(r.find(t => t.id === 'a')).toMatchObject({ date: null, dueTime: null });
+});
+
+test('saveTicketEdits with only a due time change keeps the position', () => {
+    const r = saveTicketEdits(all, 'b', edits(b, { dueTime: '08:15' }), TODAY, NOW);
+    expect(ids(listOf(r, TODAY))).toEqual(['a', 'b', 'c']);
+    expect(r.find(t => t.id === 'b')!.dueTime).toBe('08:15');
+});
+
+test('moveTicket into the backlog drops the due time', () => {
+    const timed = [{ ...a, dueTime: '09:00' }, b, c, x];
+    expect(moveTicket(timed, 'a', null, 0, NOW).find(t => t.id === 'a')).toMatchObject({ date: null, dueTime: null });
+});
+
+test('moveTicket between days keeps the due time', () => {
+    const timed = [{ ...a, dueTime: '09:00' }, b, c, x];
+    expect(moveTicket(timed, 'a', '2026-11-27', 0, NOW).find(t => t.id === 'a')).toMatchObject({ date: '2026-11-27', dueTime: '09:00' });
+});
+
+test('rollover keeps the due time', () => {
+    const overdue = makeTicket({ id: 'o', date: '2026-11-25', position: 0, dueTime: '09:00' });
+    expect(rollover([overdue], TODAY, NOW)[0]).toMatchObject({ date: TODAY, dueTime: '09:00' });
 });

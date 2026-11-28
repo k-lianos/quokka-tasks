@@ -25,12 +25,13 @@ src/app/      Angular UI (renderer)                    ◄───────�
 
 ## Data model
 
-`src/shared/types.ts` defines it. Everything is one `DataFile`, `{ version: 2, tickets: Ticket[] }`. A `Ticket` has:
+`src/shared/types.ts` defines it. Everything is one `DataFile`, `{ version: 3, tickets: Ticket[] }`. A `Ticket` has:
 
 - `status`: `pending`, `in_progress` or `completed`.
 - `date`: a local calendar date `YYYY-MM-DD`, or `null` for the backlog.
 - `position`: its 0-based index within its list (its day, or the backlog). 0 is the highest priority.
 - `priority` (`high`, `normal` or `low`), `estimate` (free text) and `link` (a URL as typed): notes shown only in the focus view. `priority` doesn't affect list order. Empty `estimate`/`link` are `''`.
+- `dueTime`: a time on the ticket's date, 24-hour `HH:MM` (`DUE_TIME` in `domain/validate.ts`), or `null`. It never triggers anything. A backlog ticket never has one: the domain drops it when a ticket moves to the backlog.
 
 Two rules hold after every change:
 
@@ -41,11 +42,12 @@ Two rules hold after every change:
 
 `tasks.json` is plain JSON on the user's disk, and it outlives every app version. A user can skip any number of releases and install the latest, so every release must read every data file any earlier release wrote, with no data loss. The `version` field is how the app tells the shapes apart.
 
-The current version is 2 (`CURRENT_VERSION` in `domain/migrate.ts`). `parseDataFile` parses the JSON, runs `migrate` (the step chain, `STEPS` in `migrate.ts`) up to the current version, then validates the result as the current version. It also returns the version found on disk, so storage knows a migration happened. A file with a missing or unknown version, including one from a newer app, is treated as corrupt: it is kept as `tasks.corrupt-<timestamp>.json` and the app starts empty.
+The current version is 3 (`CURRENT_VERSION` in `domain/migrate.ts`). `parseDataFile` parses the JSON, runs `migrate` (the step chain, `STEPS` in `migrate.ts`) up to the current version, then validates the result as the current version. It also returns the version found on disk, so storage knows a migration happened. A file with a missing or unknown version, including one from a newer app, is treated as corrupt: it is kept as `tasks.corrupt-<timestamp>.json` and the app starts empty.
 
 Shipped migrations:
 
 - **1 → 2:** sets `priority: 'normal'`, `estimate: ''` and `link: ''` on every ticket.
+- **2 → 3:** sets `dueTime: null` on every ticket.
 
 Any change to the stored shape bumps `version` and ships a migration in the same PR. A shape change is anything an older file wouldn't satisfy or an older app would misread: a new required field, a removed or renamed field, a new allowed value, a changed meaning or format. The rules:
 
@@ -88,8 +90,8 @@ The router uses hash URLs: `#/day/2026-11-26` and `#/week/2026-11-23`, where a w
 - **`App`** (the shell): title bar (`AppHeader`, `WindowControls`), banners, the routed page beside the backlog list, and the ticket editor. One `cdkDropListGroup` spans the routed page and the backlog, so tickets can be dragged between any of their lists.
 - **`DayPage`**: one day, as a list of `DayRow`s. On today, `NowBlock` shows the ticket to work on (`nowTicket` in `domain/day.ts`) and Up next lists the other open tickets. Other future days show a Planned list instead, and every day shows its Done list. Past days are read-only. Up next hides the Now ticket, so `upNextToIndex` maps its drop indexes back to positions in the day.
 - **`WeekPage`**: seven `TicketList`s, Monday to Sunday.
-- **`TicketList`** and **`TicketCard`**: a list of draggable cards with completed cards locked at the bottom, plus **`AddTicket`** for creating tickets. The backlog is a `TicketList` with date `null`.
-- **`FocusView`**: the modal ticket editor. Title, description, status, date, priority, estimate and link are drafts until **Save** (disabled while the title is empty); closing the modal or the window without saving discards them. The date is a native date input plus a "No date (backlog)" checkbox. Past days are allowed only for completed tickets (`isDateAllowed`), so a draft that breaks the rule snaps to today with a note. Save goes through `saveTicketEdits` (`domain/tickets.ts`), which moves a ticket whose date changed to the end of the new list's open tickets and enforces the same rule. The link field shows an **Open** link (`target="_blank"`) only when the draft is an `http(s)` URL; the main process opens it in the system browser. The modal also shows the created and updated dates. Delete asks first through **`ConfirmDialog`**.
+- **`TicketList`** and **`TicketCard`**: a list of draggable cards with completed cards locked at the bottom, plus **`AddTicket`** for creating tickets. `TicketCard`, `DayRow` and `NowBlock` show a ticket's due time (`14:00`, always 24-hour) next to its status when it has one. The backlog is a `TicketList` with date `null`.
+- **`FocusView`**: the modal ticket editor. Title, description, status, date, due time, priority, estimate and link are drafts until **Save** (disabled while the title is empty); closing the modal or the window without saving discards them. The date is a native date input, a native time input for the due time, and a "No date (backlog)" checkbox (which also clears the time). Both inputs take only complete values while typing and settle when focus leaves them, because Chromium reports partial input as a change. Past days are allowed only for completed tickets (`isDateAllowed`), so a draft that breaks the rule snaps to today with a note. Save goes through `saveTicketEdits` (`domain/tickets.ts`), which moves a ticket whose date changed to the end of the new list's open tickets and enforces the same rule. The link field shows an **Open** link (`target="_blank"`) only when the draft is an `http(s)` URL; the main process opens it in the system browser. The modal also shows the created and updated dates. Delete asks first through **`ConfirmDialog`**.
 
 ## Build and packaging
 

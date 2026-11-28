@@ -3,9 +3,11 @@ import { migrate } from './migrate';
 import { renumberAll } from './tickets';
 
 const DATE = /^\d{4}-\d{2}-\d{2}$/;
+/** A due time: 24-hour 'HH:MM'. */
+export const DUE_TIME = /^([01]\d|2[0-3]):[0-5]\d$/;
 
 export function emptyDataFile(): DataFile {
-    return { version: 2, tickets: [] };
+    return { version: 3, tickets: [] };
 }
 
 function isTicket(v: unknown): v is Ticket {
@@ -20,6 +22,8 @@ function isTicket(v: unknown): v is Ticket {
         (PRIORITIES as readonly unknown[]).includes(t['priority']) &&
         typeof t['estimate'] === 'string' &&
         typeof t['link'] === 'string' &&
+        // A time on a backlog ticket isn't rejected here: the domain drops it, and the file still loads.
+        (t['dueTime'] === null || (typeof t['dueTime'] === 'string' && DUE_TIME.test(t['dueTime']))) &&
         (t['date'] === null || (typeof t['date'] === 'string' && DATE.test(t['date']))) &&
         typeof t['position'] === 'number' &&
         Number.isFinite(t['position']) &&
@@ -47,5 +51,5 @@ export function parseDataFile(text: string): { data: DataFile; fromVersion: numb
     const tickets: unknown[] = file['tickets'];
     if (!tickets.every(isTicket)) return null;
     if (new Set(tickets.map(t => t.id)).size !== tickets.length) return null;
-    return { data: { version: 2, tickets: renumberAll(tickets) }, fromVersion: migrated.fromVersion };
+    return { data: { version: 3, tickets: renumberAll(tickets) }, fromVersion: migrated.fromVersion };
 }

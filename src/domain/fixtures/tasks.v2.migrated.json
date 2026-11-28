@@ -1,0 +1,61 @@
+{
+    "version": 3,
+    "tickets": [
+        {
+            "id": "0a1b2c3d-1111-4aaa-8bbb-000000000001",
+            "title": "Draft the due-time design",
+            "description": "",
+            "status": "pending",
+            "date": null,
+            "position": 0,
+            "createdAt": "2026-11-27T08:00:00.000Z",
+            "updatedAt": "2026-11-27T08:00:00.000Z",
+            "priority": "normal",
+            "estimate": "",
+            "link": "",
+            "dueTime": null
+        },
+        {
+            "id": "0a1b2c3d-2222-4aaa-8bbb-000000000002",
+            "title": "Review PR #22",
+            "description": "Migration + backup path first.",
+            "status": "pending",
+            "date": "2026-11-28",
+            "position": 0,
+            "createdAt": "2026-11-28T07:10:00.000Z",
+            "updatedAt": "2026-11-28T09:45:12.300Z",
+            "priority": "high",
+            "estimate": "2h",
+            "link": "https://github.com/k-lianos/quokka-tasks/pull/22",
+            "dueTime": null
+        },
+        {
+            "id": "0a1b2c3d-3333-4aaa-8bbb-000000000003",
+            "title": "Release 0.3.0",
+            "description": "",
+            "status": "completed",
+            "date": "2026-11-20",
+            "position": 0,
+            "createdAt": "2026-11-19T10:00:00.000Z",
+            "updatedAt": "2026-11-20T17:30:00.000Z",
+            "priority": "low",
+            "estimate": "30 min",
+            "link": "",
+            "dueTime": null
+        },
+        {
+            "id": "0a1b2c3d-4444-4aaa-8bbb-000000000004",
+            "title": "Plan stage 4",
+            "description": "Comments on tickets.",
+            "status": "in_progress",
+            "date": "2026-12-02",
+            "position": 3,
+            "createdAt": "2026-11-28T11:00:00.000Z",
+            "updatedAt": "2026-11-28T11:05:00.000Z",
+            "priority": "normal",
+            "estimate": "",
+            "link": "",
+            "dueTime": null
+        }
+    ]
+}

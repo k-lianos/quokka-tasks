@@ -2,6 +2,7 @@ import { Component, computed, effect, inject, input, output, signal, untracked }
 import { formatLongDate, formatTimestamp } from '../domain/dates';
 import { isOpenableUrl } from '../domain/links';
 import { deleteTicket, isDateAllowed, saveTicketEdits } from '../domain/tickets';
+import { DUE_TIME } from '../domain/validate';
 import { PRIORITIES, PRIORITY_LABEL, STATUS_LABEL, STATUSES, type Priority, type Status, type Ticket } from '../shared/types';
 import { ConfirmDialog } from './confirm-dialog';
 import { TasksStore } from './tasks.store';
@@ -64,6 +65,15 @@ const isCompleteDate = (value: string): boolean => value >= '1000-01-01';
                             [disabled]="date() === null"
                             (change)="onDateTyped(dateInput)"
                             (blur)="onDateLeft(dateInput)"
+                        />
+                        <input
+                            #timeInput
+                            type="time"
+                            aria-label="Due time"
+                            [value]="dueTime() ?? ''"
+                            [disabled]="date() === null"
+                            (change)="onTimeTyped(timeInput)"
+                            (blur)="onTimeLeft(timeInput)"
                         />
                         <label class="checkbox">
                             <input type="checkbox" [checked]="date() === null" (change)="setBacklog($any($event.target).checked)" />
@@ -143,6 +153,7 @@ export class FocusView {
     protected readonly priority = signal<Priority>('normal');
     protected readonly estimate = signal('');
     protected readonly link = signal('');
+    protected readonly dueTime = signal<string | null>(null);
     protected readonly priorities = PRIORITIES;
     protected readonly priorityLabel = PRIORITY_LABEL;
     /** The draft link, trimmed, when it may be opened; null hides Open. */
@@ -173,6 +184,7 @@ export class FocusView {
                 this.priority.set(this.ticket().priority);
                 this.estimate.set(this.ticket().estimate);
                 this.link.set(this.ticket().link);
+                this.dueTime.set(this.ticket().dueTime);
                 this.dateNote.set(false);
             });
         });
@@ -189,6 +201,7 @@ export class FocusView {
             priority: this.priority(),
             estimate: this.estimate(),
             link: this.link(),
+            dueTime: this.dueTime(),
         };
         void this.store.change(t => saveTicketEdits(t, id, edits, this.store.today(), new Date().toISOString()));
     }
@@ -223,8 +236,23 @@ export class FocusView {
         }
     }
 
+    /** Like the date: Chromium reports '' while a time is half typed, so take only complete times here. */
+    protected onTimeTyped(input: HTMLInputElement): void {
+        if (DUE_TIME.test(input.value)) this.dueTime.set(input.value);
+    }
+
+    /**
+     * On leaving the field: a half-filled time (Chromium reports '' with validity.badInput) restores the
+     * draft; a fully cleared field means no time.
+     */
+    protected onTimeLeft(input: HTMLInputElement): void {
+        if (input.validity.badInput || (input.value !== '' && !DUE_TIME.test(input.value))) input.value = this.dueTime() ?? '';
+        else if (input.value === '') this.dueTime.set(null);
+    }
+
     protected setBacklog(backlog: boolean): void {
         this.date.set(backlog ? null : this.store.today());
+        if (backlog) this.dueTime.set(null);
         this.dateNote.set(false);
     }
 

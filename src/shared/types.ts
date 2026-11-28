@@ -29,6 +29,8 @@ export interface Ticket {
     estimate: string;
     /** A URL as typed; '' when not set. Not validated on save. */
     link: string;
+    /** Due time on the ticket's date, 24-hour 'HH:MM'; null when not set. Always null in the backlog. */
+    dueTime: string | null;
     /** Local calendar date 'YYYY-MM-DD'; null means the ticket is in the backlog. */
     date: string | null;
     /** 0-based index within its list (its day, or the backlog). 0 = highest priority. */
@@ -38,6 +40,6 @@ export interface Ticket {
 }
 
 export interface DataFile {
-    version: 2;
+    version: 3;
     tickets: Ticket[];
 }

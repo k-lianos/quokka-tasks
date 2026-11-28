@@ -7,7 +7,12 @@ import { STATUS_LABEL, type Ticket } from '../shared/types';
         <button type="button" class="card" (click)="open.emit()">
             <span class="card-priority">{{ ticket().position + 1 }}</span>
             <span class="card-title" [title]="ticket().title">{{ ticket().title }}</span>
-            <span class="card-status" [class]="'status-' + ticket().status"> <span class="status-dot"></span>{{ statusLabel() }} </span>
+            <span class="card-meta">
+                <span class="card-status" [class]="'status-' + ticket().status"> <span class="status-dot"></span>{{ statusLabel() }} </span>
+                @if (ticket().dueTime; as time) {
+                    <span class="card-time">{{ time }}</span>
+                }
+            </span>
         </button>
     `,
 })

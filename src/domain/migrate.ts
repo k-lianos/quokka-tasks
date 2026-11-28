@@ -2,7 +2,7 @@
 // raw parsed JSON and only set fields; validation happens once, after the chain, as the current version.
 // Shipped steps are frozen: fix mistakes with a new version (docs/architecture.md, "Versioning and migrations").
 
-export const CURRENT_VERSION = 2;
+export const CURRENT_VERSION = 3;
 
 type RawFile = Record<string, unknown>;
 
@@ -16,16 +16,27 @@ const STEPS: ReadonlyArray<(file: RawFile) => RawFile> = [
             ? file['tickets'].map(t => (typeof t === 'object' && t !== null ? { ...t, priority: 'normal', estimate: '', link: '' } : t))
             : file['tickets'],
     }),
+    // 2 -> 3: dueTime. No v2 ticket had a due time.
+    file => ({
+        ...file,
+        version: 3,
+        tickets: Array.isArray(file['tickets'])
+            ? file['tickets'].map(t => (typeof t === 'object' && t !== null ? { ...t, dueTime: null } : t))
+            : file['tickets'],
+    }),
 ];
 
-/** Lift a parsed file to CURRENT_VERSION. Null when its version is missing, unknown or newer than this app. */
-export function migrate(raw: unknown): { file: unknown; fromVersion: number } | null {
+/**
+ * Lift a parsed file to `toVersion` (default CURRENT_VERSION; lower values let tests check one step).
+ * Null when its version is missing, unknown or newer than `toVersion`.
+ */
+export function migrate(raw: unknown, toVersion: number = CURRENT_VERSION): { file: unknown; fromVersion: number } | null {
     if (typeof raw !== 'object' || raw === null || Array.isArray(raw)) return null;
     const fromVersion = (raw as RawFile)['version'];
-    if (typeof fromVersion !== 'number' || !Number.isInteger(fromVersion) || fromVersion < 1 || fromVersion > CURRENT_VERSION) {
+    if (typeof fromVersion !== 'number' || !Number.isInteger(fromVersion) || fromVersion < 1 || fromVersion > toVersion) {
         return null;
     }
     let file = raw as RawFile;
-    for (let v = fromVersion; v < CURRENT_VERSION; v++) file = STEPS[v - 1](file);
+    for (let v = fromVersion; v < toVersion; v++) file = STEPS[v - 1](file);
     return { file, fromVersion };
 }

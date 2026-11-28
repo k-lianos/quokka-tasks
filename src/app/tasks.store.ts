@@ -67,7 +67,7 @@ export class TasksStore {
 
     private async persist(): Promise<void> {
         try {
-            await window.api.save({ version: 2, tickets: this._tickets() });
+            await window.api.save({ version: 3, tickets: this._tickets() });
             this._saveError.set(false);
         } catch {
             this._saveError.set(true);

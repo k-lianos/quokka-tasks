@@ -12,7 +12,12 @@ import { TasksStore } from './tasks.store';
             @if (ticket(); as t) {
                 <div class="now-head">
                     <span class="now-eyebrow">Now</span>
-                    <span class="card-status" [class]="'status-' + t.status"><span class="status-dot"></span>{{ statusLabel() }}</span>
+                    <span class="card-meta">
+                        @if (t.dueTime; as time) {
+                            <span class="card-time">{{ time }}</span>
+                        }
+                        <span class="card-status" [class]="'status-' + t.status"><span class="status-dot"></span>{{ statusLabel() }}</span>
+                    </span>
                 </div>
                 <button type="button" class="now-title" (click)="board.open(t.id)">
                     <span class="now-priority">{{ t.position + 1 }}</span>

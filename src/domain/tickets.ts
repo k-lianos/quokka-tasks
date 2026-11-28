@@ -6,7 +6,7 @@ import type { Priority, Status, Ticket } from '../shared/types';
 // (moveTicket), but saveTicketEdits may move them to another day.
 // Functions never mutate their input and return the same array when nothing changes.
 
-type Patch = Partial<Pick<Ticket, 'title' | 'description' | 'status' | 'priority' | 'estimate' | 'link'>>;
+type Patch = Partial<Pick<Ticket, 'title' | 'description' | 'status' | 'priority' | 'estimate' | 'link' | 'dueTime'>>;
 
 export function listOf(tickets: Ticket[], date: string | null): Ticket[] {
     return tickets.filter(t => t.date === date).sort((p, q) => p.position - q.position);
@@ -37,6 +37,7 @@ export function createTicket(tickets: Ticket[], args: { id: string; title: strin
         priority: 'normal',
         estimate: '',
         link: '',
+        dueTime: null,
         date: args.date,
         position: listOf(tickets, args.date).length,
         createdAt: args.now,
@@ -55,7 +56,8 @@ export function updateTicket(tickets: Ticket[], id: string, patch: Patch, now: s
     if (patch.priority !== undefined) next.priority = patch.priority;
     if (patch.estimate !== undefined) next.estimate = patch.estimate.trim();
     if (patch.link !== undefined) next.link = patch.link.trim();
-    const fields = ['title', 'description', 'status', 'priority', 'estimate', 'link'] as const;
+    if (patch.dueTime !== undefined) next.dueTime = patch.dueTime;
+    const fields = ['title', 'description', 'status', 'priority', 'estimate', 'link', 'dueTime'] as const;
     if (fields.every(f => next[f] === current[f])) return tickets;
     next.updatedAt = now;
     return tickets.map(t => (t.id === id ? next : t));
@@ -74,6 +76,7 @@ export interface TicketEdits {
     priority: Priority;
     estimate: string;
     link: string;
+    dueTime: string | null;
 }
 
 /**
@@ -85,7 +88,8 @@ export function saveTicketEdits(tickets: Ticket[], id: string, edits: TicketEdit
     if (!current) return tickets;
     const date = isDateAllowed(edits.date, edits.status, today) ? edits.date : today;
     const { title, description, status, priority, estimate, link } = edits;
-    let next = updateTicket(tickets, id, { title, description, status, priority, estimate, link }, now);
+    const dueTime = date === null ? null : edits.dueTime; // no time without a day
+    let next = updateTicket(tickets, id, { title, description, status, priority, estimate, link, dueTime }, now);
     if (date === current.date) return next;
 
     const source = listOf(next, current.date)
@@ -122,7 +126,10 @@ export function moveTicket(tickets: Ticket[], id: string, toDate: string | null,
             .map(t => t.id);
         next = placeList(next, moving.date, source, new Set(), now);
     }
-    return placeList(next, toDate, target, new Set([id]), now);
+    next = placeList(next, toDate, target, new Set([id]), now);
+    // No time without a day: a ticket dragged into the backlog loses its due time.
+    if (toDate === null && moving.dueTime !== null) next = next.map(t => (t.id === id ? { ...t, dueTime: null, updatedAt: now } : t));
+    return next;
 }
 
 /** Order every list open-first, completed after, each group keeping its order. Stable, so a ticket
