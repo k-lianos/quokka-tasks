@@ -112,3 +112,16 @@ export async function goTo(page: Page, hash: string): Promise<void> {
         location.hash = h;
     }, hash);
 }
+
+/** The ticket editor (focus view). */
+export function editor(page: Page): Locator {
+    return page.getByRole('dialog', { name: 'Ticket' });
+}
+
+/** Add a ticket through a list's "+ add" button. */
+export async function addTicket(where: Locator, title: string): Promise<void> {
+    await where.getByRole('button', { name: '+ add' }).click();
+    const input = where.getByPlaceholder('Ticket title, then Enter');
+    await input.fill(title);
+    await input.press('Enter');
+}
