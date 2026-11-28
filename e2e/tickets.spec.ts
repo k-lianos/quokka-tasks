@@ -9,7 +9,7 @@ const seeded = ticket({
     date: null,
     updatedAt: '2026-01-01T00:00:00.000Z',
 });
-const byId = (tickets: { id: string }[], id: string) => tickets.find(t => t.id === id);
+const byId = <T extends { id: string }>(tickets: T[], id: string) => tickets.find(t => t.id === id);
 
 test('add to today and to the backlog', async ({ quokka: { page, today, readData } }) => {
     await addTicket(list(page, 'Up next'), 'Write tests');
