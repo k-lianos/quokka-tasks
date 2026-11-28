@@ -482,6 +482,19 @@ app-ticket-list {
     overflow: hidden;
     text-overflow: ellipsis;
 }
+.card-meta {
+    display: flex;
+    flex-wrap: wrap; /* on narrow cards the time drops below the status instead of hiding it */
+    align-items: center;
+    column-gap: var(--space-2);
+    min-width: 0;
+}
+.card-time {
+    flex: none;
+    font-size: var(--font-size-small);
+    font-variant-numeric: tabular-nums;
+    color: var(--color-text-muted);
+}
 .card-status {
     display: flex;
     align-items: center;
@@ -639,7 +652,7 @@ app-ticket-list {
 .field-date input[type='date'] {
     color-scheme: dark;
 }
-.field-date input[type='date']:disabled {
+.field-date input:disabled {
     color: var(--color-text-muted); /* like .button:disabled: muted text, never opacity (AA contrast) */
     cursor: not-allowed;
 }

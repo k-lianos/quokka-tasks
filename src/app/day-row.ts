@@ -15,6 +15,9 @@ import { STATUS_LABEL, type Ticket } from '../shared/types';
                     }
                 </span>
             </button>
+            @if (ticket().dueTime; as time) {
+                <span class="card-time">{{ time }}</span>
+            }
             <span class="card-status" [class]="'status-' + ticket().status"> <span class="status-dot"></span>{{ statusLabel() }} </span>
             @if (showStart()) {
                 <button type="button" class="button day-row-start" (click)="start.emit()">Start</button>
