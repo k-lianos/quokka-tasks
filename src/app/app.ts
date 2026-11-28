@@ -1,5 +1,5 @@
 import { CdkDropListGroup } from '@angular/cdk/drag-drop';
-import { Component, computed, effect, inject, untracked, viewChild } from '@angular/core';
+import { Component, computed, effect, inject, untracked } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { NavigationEnd, Router, RouterOutlet } from '@angular/router';
 import { filter, map } from 'rxjs';
@@ -111,14 +111,13 @@ export class App {
         const id = this.board.openTicketId();
         return id ? (this.store.tickets().find(t => t.id === id) ?? null) : null;
     });
-    private readonly focusView = viewChild(FocusView);
 
     constructor() {
         void this.store.init();
         // Lets styles.css adapt the title bar per OS (macOS draws its own window buttons).
         document.documentElement.dataset['platform'] = window.api.platform;
-        // Before the window closes, save whatever is still being typed in the ticket editor.
-        window.api.onFlushRequest(() => this.focusView()?.flush() ?? Promise.resolve());
+        // Nothing to flush before the window closes: ticket edits save only on Save, unsaved drafts are dropped.
+        window.api.onFlushRequest(() => Promise.resolve());
 
         // When the date changes while the app is open, follow to the new day/week if the user was on the old one.
         let previousToday = this.store.today();

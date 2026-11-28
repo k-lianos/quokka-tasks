@@ -62,7 +62,7 @@ Any change to the stored shape bumps `version` and ships a migration in the same
 The channels are in `IPC` in `src/shared/api.ts`:
 
 - `tasks:load` and `tasks:save` load and save the whole `DataFile`. There are no partial updates.
-- `app:flush-request` and `app:flush-done` run the close handshake. When the window closes, the main process asks the UI to flush pending edits, waits for the UI and then for the storage queue to drain, and only then closes. A 2-second timeout bounds the whole sequence.
+- `app:flush-request` and `app:flush-done` run the close handshake. When the window closes, the main process asks the UI to flush pending edits (the UI has none today: ticket edits save only on Save), waits for the UI and then for the storage queue to drain, and only then closes. A 2-second timeout bounds the whole sequence.
 - `window:*` carries the minimize, maximize and close buttons and maximize-state updates for the frameless window.
 
 ## UI (`src/app/`)
@@ -84,7 +84,7 @@ The router uses hash URLs: `#/day/2026-11-26` and `#/week/2026-11-23`, where a w
 - **`DayPage`**: one day, as a list of `DayRow`s. On today, `NowBlock` shows the ticket to work on (`nowTicket` in `domain/day.ts`) and Up next lists the other open tickets. Other future days show a Planned list instead, and every day shows its Done list. Past days are read-only. Up next hides the Now ticket, so `upNextToIndex` maps its drop indexes back to positions in the day.
 - **`WeekPage`**: seven `TicketList`s, Monday to Sunday.
 - **`TicketList`** and **`TicketCard`**: a list of draggable cards with completed cards locked at the bottom, plus **`AddTicket`** for creating tickets. The backlog is a `TicketList` with date `null`.
-- **`FocusView`**: the modal ticket editor. Title and description edits save after 400 ms. Status changes save immediately. Delete asks first through **`ConfirmDialog`**.
+- **`FocusView`**: the modal ticket editor. Title, description and status are drafts until **Save** (disabled while the title is empty); closing the modal or the window without saving discards them. Delete asks first through **`ConfirmDialog`**.
 
 ## Build and packaging
 
