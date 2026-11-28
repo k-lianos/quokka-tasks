@@ -15,7 +15,7 @@ const CLICK_AFTER_DRAG_MS = 150;
     selector: 'app-ticket-list',
     imports: [TicketCard, AddTicket, CdkDropList, CdkDrag, CdkDragPlaceholder, RouterLink],
     template: `
-        <section class="list" [class.is-today]="isToday()" [class.is-past]="isPast()">
+        <section class="list" [class.is-today]="isToday()" [class.is-past]="isPast()" [attr.aria-label]="heading()">
             <header class="list-heading">
                 @if (headingLink(); as link) {
                     <a class="list-heading-link" [routerLink]="link">{{ heading() }}</a>

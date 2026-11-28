@@ -48,3 +48,7 @@ Thumbs.db
 
 # Superpowers workspace
 /.superpowers
+
+# Playwright
+/test-results
+/playwright-report
