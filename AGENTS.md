@@ -29,6 +29,7 @@ Tooling: TypeScript, Vitest, npm (public registry via the project `.npmrc`).
 - Changing the shape of `tasks.json` (`DataFile`, `Ticket`): bump `version` and ship a migration in the same change, so a user on any older version upgrades without losing data. Follow "Versioning and migrations" in `docs/architecture.md`.
 - All dependencies are devDependencies.
 - All styles live in `src/styles.css`.
+- Template event bindings call a method that returns `void` (`(click)="onBackdropClick()"`). Angular calls `preventDefault()` when a listener returns `false`, so an inline `cond && close()` silently breaks checkboxes and links inside that element.
 - Keep hash URLs in the router (see `docs/architecture.md`).
 - UI follows `docs/style-guide.md`: use the design tokens in `src/styles.css`, no raw colours in rules.
 

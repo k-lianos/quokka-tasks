@@ -99,6 +99,11 @@ All tickets are in one file:
 Back it up by copying that file. If the file is ever unreadable, the app keeps it as
 `tasks.corrupt-<time>.json` next to it and starts empty. It never overwrites it.
 
+When a new version of the app changes the file's format, it upgrades the file on first
+launch and first keeps the original as `tasks.v<old version>.backup.json` (e.g.
+`tasks.v2.backup.json`). Older versions of the app can't read an upgraded file; to go back,
+restore that backup as `tasks.json`.
+
 ## Design
 
 See `docs/superpowers/specs/2026-11-26-tasks-app-design.md`.
