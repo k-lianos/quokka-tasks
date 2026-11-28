@@ -1,8 +1,9 @@
-import type { Ticket } from '../shared/types';
+import type { Status, Ticket } from '../shared/types';
 
 // Pure list operations. A "list" is one calendar date or the backlog (date === null).
 // Positions within a list are contiguous from 0 (0 = highest priority).
-// Within a list, open tickets come before completed ones; completed tickets can't be moved.
+// Within a list, open tickets come before completed ones; completed tickets can't be dragged
+// (moveTicket), but saveTicketEdits may move them to another day.
 // Functions never mutate their input and return the same array when nothing changes.
 
 type Patch = Partial<Pick<Ticket, 'title' | 'description' | 'status'>>;
@@ -53,6 +54,40 @@ export function updateTicket(tickets: Ticket[], id: string, patch: Patch, now: s
     }
     next.updatedAt = now;
     return tickets.map(t => (t.id === id ? next : t));
+}
+
+/** Past days are only for completed tickets; the backlog, today and future days take any status. */
+export function isDateAllowed(date: string | null, status: Status, today: string): boolean {
+    return date === null || date >= today || status === 'completed';
+}
+
+export interface TicketEdits {
+    title: string;
+    description: string;
+    status: Status;
+    date: string | null;
+}
+
+/**
+ * Apply the focus view's draft in one step. A changed date moves the ticket to the end of the
+ * target list's open tickets (completed ones too). A date the status doesn't allow becomes today.
+ */
+export function saveTicketEdits(tickets: Ticket[], id: string, edits: TicketEdits, today: string, now: string): Ticket[] {
+    const current = tickets.find(t => t.id === id);
+    if (!current) return tickets;
+    const date = isDateAllowed(edits.date, edits.status, today) ? edits.date : today;
+    const { title, description, status } = edits;
+    let next = updateTicket(tickets, id, { title, description, status }, now);
+    if (date === current.date) return next;
+
+    const source = listOf(next, current.date)
+        .filter(t => t.id !== id)
+        .map(t => t.id);
+    next = placeList(next, current.date, source, new Set(), now);
+    const others = listOf(next, date).filter(t => t.id !== id);
+    const target = others.map(t => t.id);
+    target.splice(others.filter(t => t.status !== 'completed').length, 0, id);
+    return placeList(next, date, target, new Set([id]), now);
 }
 
 export function deleteTicket(tickets: Ticket[], id: string): Ticket[] {

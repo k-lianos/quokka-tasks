@@ -1,7 +1,19 @@
 import { expect, test } from 'vitest';
 import { makeTicket } from './testUtils';
 import { rollover } from './rollover';
-import { createTicket, deleteTicket, listOf, moveTicket, renumberAll, sinkCompleted, updateTicket } from './tickets';
+import type { Ticket } from '../shared/types';
+import {
+    createTicket,
+    deleteTicket,
+    isDateAllowed,
+    listOf,
+    moveTicket,
+    renumberAll,
+    saveTicketEdits,
+    sinkCompleted,
+    type TicketEdits,
+    updateTicket,
+} from './tickets';
 
 const a = makeTicket({ id: 'a', date: '2026-11-26', position: 0 });
 const b = makeTicket({ id: 'b', date: '2026-11-26', position: 1 });
@@ -153,4 +165,66 @@ test('sinkCompleted leaves its input untouched and renumbers duplicate or gapped
     ]);
     expect(listOf(r, null).map(t => [t.id, t.position])).toEqual([['x', 0]]);
     expect(r.every((t, i) => t.updatedAt === input[i].updatedAt)).toBe(true);
+});
+
+const TODAY = '2026-11-26';
+
+test('isDateAllowed allows backlog, today and future for any status, past only for completed', () => {
+    expect(isDateAllowed(null, 'pending', TODAY)).toBe(true);
+    expect(isDateAllowed(TODAY, 'in_progress', TODAY)).toBe(true);
+    expect(isDateAllowed('2026-11-30', 'pending', TODAY)).toBe(true);
+    expect(isDateAllowed('2026-11-25', 'pending', TODAY)).toBe(false);
+    expect(isDateAllowed('2026-11-25', 'completed', TODAY)).toBe(true);
+});
+
+const edits = (t: Ticket, e: Partial<TicketEdits> = {}): TicketEdits => ({
+    title: t.title,
+    description: t.description,
+    status: t.status,
+    date: t.date,
+    ...e,
+});
+
+test('saveTicketEdits returns the same array when nothing changes or the id is unknown', () => {
+    expect(saveTicketEdits(all, 'a', edits(a), TODAY, NOW)).toBe(all);
+    expect(saveTicketEdits(all, 'missing', edits(a, { title: 'z' }), TODAY, NOW)).toBe(all);
+});
+
+test('saveTicketEdits with the same date keeps the position', () => {
+    const r = saveTicketEdits(all, 'a', edits(a, { title: 'A', description: 'd' }), TODAY, NOW);
+    expect(ids(listOf(r, TODAY))).toEqual(['a', 'b', 'c']);
+    expect(r.find(t => t.id === 'a')).toMatchObject({ title: 'A', description: 'd', updatedAt: NOW });
+});
+
+test('saveTicketEdits moves to the end of the target list open tickets and renumbers the source', () => {
+    const done = makeTicket({ id: 'd', date: null, position: 1, status: 'completed' });
+    const r = saveTicketEdits([...all, done], 'a', edits(a, { date: null }), TODAY, NOW);
+    expect(ids(listOf(r, null))).toEqual(['x', 'a', 'd']);
+    expect(listOf(r, null).map(t => t.position)).toEqual([0, 1, 2]);
+    expect(listOf(r, TODAY).map(t => t.position)).toEqual([0, 1]);
+    expect(r.find(t => t.id === 'a')!.updatedAt).toBe(NOW);
+});
+
+test('saveTicketEdits puts a completed ticket on a past day', () => {
+    const r = saveTicketEdits(all, 'b', edits(b, { status: 'completed', date: '2026-11-20' }), TODAY, NOW);
+    expect(r.find(t => t.id === 'b')).toMatchObject({ date: '2026-11-20', position: 0, status: 'completed' });
+    expect(ids(listOf(r, TODAY))).toEqual(['a', 'c']);
+});
+
+test('saveTicketEdits snaps an open ticket with a past date to today', () => {
+    const r = saveTicketEdits(all, 'x', edits(x, { date: '2026-11-20' }), TODAY, NOW);
+    expect(r.find(t => t.id === 'x')).toMatchObject({ date: TODAY, position: 3 });
+});
+
+test('saveTicketEdits snaps a stale "today" draft after midnight', () => {
+    const r = saveTicketEdits(all, 'a', edits(a, { title: 'A' }), '2026-11-27', NOW);
+    expect(r.find(t => t.id === 'a')).toMatchObject({ date: '2026-11-27', title: 'A' });
+});
+
+test('saveTicketEdits moves a completed ticket ahead of the target day completed tickets', () => {
+    const doneA = makeTicket({ id: 'p', date: '2026-11-27', position: 0, status: 'completed' });
+    const doneB = makeTicket({ id: 'q', date: TODAY, position: 3, status: 'completed' });
+    const r = saveTicketEdits([...all, doneA, doneB], 'q', edits(doneB, { date: '2026-11-27' }), TODAY, NOW);
+    expect(ids(listOf(r, '2026-11-27'))).toEqual(['q', 'p']);
+    expect(listOf(r, '2026-11-27').map(t => t.position)).toEqual([0, 1]);
 });
