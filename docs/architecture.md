@@ -84,7 +84,7 @@ The router uses hash URLs: `#/day/2026-11-26` and `#/week/2026-11-23`, where a w
 - **`DayPage`**: one day, as a list of `DayRow`s. On today, `NowBlock` shows the ticket to work on (`nowTicket` in `domain/day.ts`) and Up next lists the other open tickets. Other future days show a Planned list instead, and every day shows its Done list. Past days are read-only. Up next hides the Now ticket, so `upNextToIndex` maps its drop indexes back to positions in the day.
 - **`WeekPage`**: seven `TicketList`s, Monday to Sunday.
 - **`TicketList`** and **`TicketCard`**: a list of draggable cards with completed cards locked at the bottom, plus **`AddTicket`** for creating tickets. The backlog is a `TicketList` with date `null`.
-- **`FocusView`**: the modal ticket editor. Title, description and status are drafts until **Save** (disabled while the title is empty); closing the modal or the window without saving discards them. Delete asks first through **`ConfirmDialog`**.
+- **`FocusView`**: the modal ticket editor. Title, description, status and date are drafts until **Save** (disabled while the title is empty); closing the modal or the window without saving discards them. The date is a native date input plus a "No date (backlog)" checkbox. Past days are allowed only for completed tickets (`isDateAllowed`), so a draft that breaks the rule snaps to today with a note. Save goes through `saveTicketEdits` (`domain/tickets.ts`), which moves a ticket whose date changed to the end of the new list's open tickets and enforces the same rule. The modal also shows the created and updated dates. Delete asks first through **`ConfirmDialog`**.
 
 ## Build and packaging
 

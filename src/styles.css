@@ -621,6 +621,38 @@ app-ticket-list {
     font-size: var(--font-size-small);
     color: var(--color-danger);
 }
+.field-note,
+.focus-meta {
+    margin: calc(-1 * var(--space-1)) 0 0;
+    font-size: var(--font-size-small);
+    color: var(--color-text-muted);
+}
+.focus-meta {
+    margin: 0;
+}
+.field-date {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+}
+.field-date input[type='date'] {
+    color-scheme: dark;
+}
+.field-date input[type='date']:disabled {
+    color: var(--color-text-muted); /* like .button:disabled: muted text, never opacity (AA contrast) */
+    cursor: not-allowed;
+}
+.checkbox {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    font-weight: normal;
+    color: var(--color-text);
+}
+.field .checkbox input {
+    padding: 0;
+    accent-color: var(--color-accent);
+}
 
 .confirm-dialog {
     width: min(360px, 90vw);
