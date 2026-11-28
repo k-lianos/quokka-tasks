@@ -55,8 +55,12 @@ export async function launch(dir: string): Promise<{ app: ElectronApplication; p
     return { app, page };
 }
 
-/** Close through the normal close handshake; kill the process if that hangs. */
+const closedApps = new WeakSet<ElectronApplication>();
+
+/** Close through the normal close handshake; kill the process if that hangs. Safe to call twice. */
 export async function closeApp(app: ElectronApplication): Promise<void> {
+    if (closedApps.has(app)) return;
+    closedApps.add(app);
     const proc = app.process();
     const exited = new Promise<void>(resolve => {
         if (proc.exitCode !== null || proc.signalCode !== null) resolve();
