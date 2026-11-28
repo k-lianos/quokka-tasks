@@ -1,7 +1,8 @@
 import { Component, computed, effect, inject, input, output, signal, untracked } from '@angular/core';
 import { formatLongDate, formatTimestamp } from '../domain/dates';
+import { isOpenableUrl } from '../domain/links';
 import { deleteTicket, isDateAllowed, saveTicketEdits } from '../domain/tickets';
-import { STATUS_LABEL, STATUSES, type Status, type Ticket } from '../shared/types';
+import { PRIORITIES, PRIORITY_LABEL, STATUS_LABEL, STATUSES, type Priority, type Status, type Ticket } from '../shared/types';
 import { ConfirmDialog } from './confirm-dialog';
 import { TasksStore } from './tasks.store';
 
@@ -74,6 +75,36 @@ const isCompleteDate = (value: string): boolean => value >= '1000-01-01';
                     <p class="field-note">Past dates are only for completed tickets</p>
                 }
 
+                <label class="field">
+                    <span>Priority</span>
+                    <select [value]="priority()" (change)="priority.set($any($event.target).value)">
+                        @for (p of priorities; track p) {
+                            <option [value]="p" [selected]="p === priority()">{{ priorityLabel[p] }}</option>
+                        }
+                    </select>
+                </label>
+
+                <label class="field">
+                    <span>Estimate</span>
+                    <input type="text" placeholder="e.g. 2h" [value]="estimate()" (input)="estimate.set($any($event.target).value)" />
+                </label>
+
+                <div class="field">
+                    <span id="focus-link-label">Link</span>
+                    <div class="field-row">
+                        <input
+                            type="text"
+                            aria-labelledby="focus-link-label"
+                            placeholder="https://…"
+                            [value]="link()"
+                            (input)="link.set($any($event.target).value)"
+                        />
+                        @if (openableLink(); as url) {
+                            <a class="field-link" target="_blank" rel="noopener" [href]="url">Open</a>
+                        }
+                    </div>
+                </div>
+
                 <label class="field field-grow">
                     <span>Description</span>
                     <textarea [value]="description()" (input)="description.set($any($event.target).value)"></textarea>
@@ -109,6 +140,16 @@ export class FocusView {
     protected readonly description = signal('');
     protected readonly status = signal<Status>('pending');
     protected readonly date = signal<string | null>(null);
+    protected readonly priority = signal<Priority>('normal');
+    protected readonly estimate = signal('');
+    protected readonly link = signal('');
+    protected readonly priorities = PRIORITIES;
+    protected readonly priorityLabel = PRIORITY_LABEL;
+    /** The draft link, trimmed, when it may be opened; null hides Open. */
+    protected readonly openableLink = computed(() => {
+        const url = this.link().trim();
+        return isOpenableUrl(url) ? url : null;
+    });
     protected readonly dateNote = signal(false);
     protected readonly confirming = signal(false);
     protected readonly minDate = computed(() => (this.status() === 'completed' ? null : this.store.today()));
@@ -129,6 +170,9 @@ export class FocusView {
                 this.description.set(this.ticket().description);
                 this.status.set(this.ticket().status);
                 this.date.set(this.ticket().date);
+                this.priority.set(this.ticket().priority);
+                this.estimate.set(this.ticket().estimate);
+                this.link.set(this.ticket().link);
                 this.dateNote.set(false);
             });
         });
@@ -137,7 +181,15 @@ export class FocusView {
     protected save(): void {
         if (this.titleInvalid()) return;
         const id = this.ticket().id;
-        const edits = { title: this.title(), description: this.description(), status: this.status(), date: this.date() };
+        const edits = {
+            title: this.title(),
+            description: this.description(),
+            status: this.status(),
+            date: this.date(),
+            priority: this.priority(),
+            estimate: this.estimate(),
+            link: this.link(),
+        };
         void this.store.change(t => saveTicketEdits(t, id, edits, this.store.today(), new Date().toISOString()));
     }
 
