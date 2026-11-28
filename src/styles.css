@@ -639,7 +639,8 @@ app-ticket-list {
     color-scheme: dark;
 }
 .field-date input[type='date']:disabled {
-    opacity: 0.5;
+    color: var(--color-text-muted); /* like .button:disabled: muted text, never opacity (AA contrast) */
+    cursor: not-allowed;
 }
 .checkbox {
     display: flex;
