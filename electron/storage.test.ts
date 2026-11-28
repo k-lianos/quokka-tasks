@@ -1,7 +1,29 @@
 import * as fs from 'node:fs/promises';
 import * as os from 'node:os';
 import * as path from 'node:path';
-import { beforeEach, expect, test } from 'vitest';
+import { beforeEach, expect, test, vi } from 'vitest';
+
+// Lets a test make the next backup write fail after the file was created (like a full disk).
+const failBackupWrite = vi.hoisted(() => ({ next: false }));
+vi.mock('node:fs/promises', async importOriginal => {
+    const real = await importOriginal<typeof import('node:fs/promises')>();
+    return {
+        ...real,
+        open: async (...args: Parameters<typeof real.open>) => {
+            const handle = await real.open(...args);
+            if (!failBackupWrite.next || !String(args[0]).includes('.backup')) return handle;
+            failBackupWrite.next = false;
+            return {
+                writeFile: async () => {
+                    await handle.writeFile('partial');
+                    throw Object.assign(new Error('no space'), { code: 'ENOSPC' });
+                },
+                sync: () => handle.sync(),
+                close: () => handle.close(),
+            };
+        },
+    };
+});
 import { makeTicket } from '../src/domain/testUtils';
 import type { DataFile } from '../src/shared/types';
 import { createStore } from './storage';
@@ -11,10 +33,10 @@ beforeEach(async () => {
     dir = await fs.mkdtemp(path.join(os.tmpdir(), 'qt-'));
 });
 
-const data = (...ids: string[]): DataFile => ({ version: 1, tickets: ids.map(id => makeTicket({ id })) });
+const data = (...ids: string[]): DataFile => ({ version: 2, tickets: ids.map(id => makeTicket({ id })) });
 
 test('missing file loads empty with no notice', async () => {
-    expect(await createStore(dir).load()).toEqual({ data: { version: 1, tickets: [] }, notice: null });
+    expect(await createStore(dir).load()).toEqual({ data: { version: 2, tickets: [] }, notice: null });
 });
 
 test('save then load round-trips and leaves no temp file', async () => {
@@ -43,7 +65,7 @@ test('concurrent saves are serialized; last one wins', async () => {
 
 test('a failed save does not block later saves', async () => {
     const s = createStore(dir);
-    const bad = { version: 1, tickets: [] } as unknown as DataFile;
+    const bad = { version: 2, tickets: [] } as unknown as DataFile;
     (bad as unknown as { self: unknown }).self = bad; // circular → JSON.stringify throws
     await expect(s.save(bad)).rejects.toThrow();
     await s.save(data('after'));
@@ -65,8 +87,89 @@ test('whenIdle resolves only after queued saves have reached the disk', async ()
 
 test('whenIdle resolves even if the last save failed', async () => {
     const s = createStore(dir);
-    const bad = { version: 1, tickets: [] } as unknown as DataFile;
+    const bad = { version: 2, tickets: [] } as unknown as DataFile;
     (bad as unknown as { self: unknown }).self = bad;
     s.save(bad).catch(() => undefined);
     await expect(s.whenIdle()).resolves.toBeUndefined();
+});
+
+const v1Text = JSON.stringify(
+    {
+        version: 1,
+        tickets: [
+            {
+                id: 'a',
+                title: 'A',
+                description: '',
+                status: 'pending',
+                date: null,
+                position: 0,
+                createdAt: '2026-01-01T00:00:00.000Z',
+                updatedAt: '2026-01-01T00:00:00.000Z',
+            },
+        ],
+    },
+    null,
+    2,
+);
+const tasksFile = () => path.join(dir, 'tasks.json');
+const backups = async () => (await fs.readdir(dir)).filter(f => /^tasks\.v1\.backup.*\.json$/.test(f)).sort();
+
+test('a v1 file is backed up byte-for-byte and saved as v2', async () => {
+    await fs.writeFile(tasksFile(), v1Text);
+    const r = await createStore(dir).load();
+    expect(r.data.version).toBe(2);
+    expect(r.data.tickets[0]).toMatchObject({ id: 'a', priority: 'normal', estimate: '', link: '' });
+    expect(await backups()).toEqual(['tasks.v1.backup.json']);
+    expect(await fs.readFile(path.join(dir, 'tasks.v1.backup.json'), 'utf8')).toBe(v1Text);
+    expect(JSON.parse(await fs.readFile(tasksFile(), 'utf8')).version).toBe(2);
+});
+
+test('a second load makes no new backup', async () => {
+    await fs.writeFile(tasksFile(), v1Text);
+    await createStore(dir).load();
+    await createStore(dir).load();
+    expect(await backups()).toEqual(['tasks.v1.backup.json']);
+});
+
+test('an existing backup is never overwritten', async () => {
+    await fs.writeFile(path.join(dir, 'tasks.v1.backup.json'), 'old');
+    await fs.writeFile(tasksFile(), v1Text);
+    await createStore(dir).load();
+    expect(await fs.readFile(path.join(dir, 'tasks.v1.backup.json'), 'utf8')).toBe('old');
+    const stamped = (await backups()).filter(f => /^tasks\.v1\.backup-.+\.json$/.test(f));
+    expect(stamped).toHaveLength(1);
+    expect(await fs.readFile(path.join(dir, stamped[0]), 'utf8')).toBe(v1Text);
+});
+
+test('a v2 file creates no backup', async () => {
+    await createStore(dir).save(data('a'));
+    await createStore(dir).load();
+    expect(await fs.readdir(dir)).toEqual(['tasks.json']);
+});
+
+test('a future-version file takes the corrupt path and creates no backup', async () => {
+    await fs.writeFile(tasksFile(), JSON.stringify({ version: 3, tickets: [] }));
+    const r = await createStore(dir).load();
+    expect(r.notice).toContain('tasks.corrupt-');
+    expect(await backups()).toEqual([]);
+});
+
+test('a failed save after migration still returns the data', async () => {
+    await fs.writeFile(tasksFile(), v1Text);
+    await fs.mkdir(path.join(dir, 'tasks.json.tmp')); // the temp-file open fails; the backup doesn't
+    const r = await createStore(dir).load();
+    expect(r.data.version).toBe(2);
+    expect(await backups()).toEqual(['tasks.v1.backup.json']);
+    expect(await fs.readFile(tasksFile(), 'utf8')).toBe(v1Text);
+});
+
+test('a failed backup write leaves no partial backup and fails the load', async () => {
+    await fs.writeFile(tasksFile(), v1Text);
+    failBackupWrite.next = true;
+    await expect(createStore(dir).load()).rejects.toThrow('no space');
+    expect(await backups()).toEqual([]);
+    expect(await fs.readFile(tasksFile(), 'utf8')).toBe(v1Text);
+    await createStore(dir).load(); // space freed: the backup goes to the canonical name
+    expect(await backups()).toEqual(['tasks.v1.backup.json']);
 });

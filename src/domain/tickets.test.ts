@@ -36,6 +36,11 @@ test('createTicket appends a pending ticket at the bottom', () => {
     });
 });
 
+test('createTicket sets priority normal, empty estimate and link', () => {
+    const r = createTicket(all, { id: 'n', title: 'New', date: null, now: NOW });
+    expect(r.find(t => t.id === 'n')).toMatchObject({ priority: 'normal', estimate: '', link: '' });
+});
+
 test('createTicket rejects whitespace-only titles', () => {
     expect(createTicket(all, { id: 'n', title: '   ', date: null, now: NOW })).toBe(all);
 });
@@ -182,6 +187,9 @@ const edits = (t: Ticket, e: Partial<TicketEdits> = {}): TicketEdits => ({
     description: t.description,
     status: t.status,
     date: t.date,
+    priority: t.priority,
+    estimate: t.estimate,
+    link: t.link,
     ...e,
 });
 
@@ -227,4 +235,15 @@ test('saveTicketEdits moves a completed ticket ahead of the target day completed
     const r = saveTicketEdits([...all, doneA, doneB], 'q', edits(doneB, { date: '2026-11-27' }), TODAY, NOW);
     expect(ids(listOf(r, '2026-11-27'))).toEqual(['q', 'p']);
     expect(listOf(r, '2026-11-27').map(t => t.position)).toEqual([0, 1]);
+});
+
+test('saveTicketEdits stores priority, estimate and link, trimmed', () => {
+    const r = saveTicketEdits(all, 'a', edits(a, { priority: 'high', estimate: '  2h ', link: ' https://x.y ' }), TODAY, NOW);
+    expect(r.find(t => t.id === 'a')).toMatchObject({ priority: 'high', estimate: '2h', link: 'https://x.y', updatedAt: NOW });
+});
+
+test('saveTicketEdits with only an estimate change keeps the position', () => {
+    const r = saveTicketEdits(all, 'b', edits(b, { estimate: '30 min' }), TODAY, NOW);
+    expect(ids(listOf(r, TODAY))).toEqual(['a', 'b', 'c']);
+    expect(r.find(t => t.id === 'b')).toMatchObject({ estimate: '30 min', updatedAt: NOW });
 });

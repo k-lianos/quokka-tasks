@@ -1,4 +1,4 @@
-import type { Status, Ticket } from '../shared/types';
+import type { Priority, Status, Ticket } from '../shared/types';
 
 // Pure list operations. A "list" is one calendar date or the backlog (date === null).
 // Positions within a list are contiguous from 0 (0 = highest priority).
@@ -6,7 +6,7 @@ import type { Status, Ticket } from '../shared/types';
 // (moveTicket), but saveTicketEdits may move them to another day.
 // Functions never mutate their input and return the same array when nothing changes.
 
-type Patch = Partial<Pick<Ticket, 'title' | 'description' | 'status'>>;
+type Patch = Partial<Pick<Ticket, 'title' | 'description' | 'status' | 'priority' | 'estimate' | 'link'>>;
 
 export function listOf(tickets: Ticket[], date: string | null): Ticket[] {
     return tickets.filter(t => t.date === date).sort((p, q) => p.position - q.position);
@@ -34,6 +34,9 @@ export function createTicket(tickets: Ticket[], args: { id: string; title: strin
         title,
         description: '',
         status: 'pending',
+        priority: 'normal',
+        estimate: '',
+        link: '',
         date: args.date,
         position: listOf(tickets, args.date).length,
         createdAt: args.now,
@@ -49,9 +52,11 @@ export function updateTicket(tickets: Ticket[], id: string, patch: Patch, now: s
     if (patch.title !== undefined && patch.title.trim()) next.title = patch.title.trim();
     if (patch.description !== undefined) next.description = patch.description;
     if (patch.status !== undefined) next.status = patch.status;
-    if (next.title === current.title && next.description === current.description && next.status === current.status) {
-        return tickets;
-    }
+    if (patch.priority !== undefined) next.priority = patch.priority;
+    if (patch.estimate !== undefined) next.estimate = patch.estimate.trim();
+    if (patch.link !== undefined) next.link = patch.link.trim();
+    const fields = ['title', 'description', 'status', 'priority', 'estimate', 'link'] as const;
+    if (fields.every(f => next[f] === current[f])) return tickets;
     next.updatedAt = now;
     return tickets.map(t => (t.id === id ? next : t));
 }
@@ -66,6 +71,9 @@ export interface TicketEdits {
     description: string;
     status: Status;
     date: string | null;
+    priority: Priority;
+    estimate: string;
+    link: string;
 }
 
 /**
@@ -76,8 +84,8 @@ export function saveTicketEdits(tickets: Ticket[], id: string, edits: TicketEdit
     const current = tickets.find(t => t.id === id);
     if (!current) return tickets;
     const date = isDateAllowed(edits.date, edits.status, today) ? edits.date : today;
-    const { title, description, status } = edits;
-    let next = updateTicket(tickets, id, { title, description, status }, now);
+    const { title, description, status, priority, estimate, link } = edits;
+    let next = updateTicket(tickets, id, { title, description, status, priority, estimate, link }, now);
     if (date === current.date) return next;
 
     const source = listOf(next, current.date)

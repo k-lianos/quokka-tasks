@@ -25,11 +25,12 @@ src/app/      Angular UI (renderer)                    ◄───────�
 
 ## Data model
 
-`src/shared/types.ts` defines it. Everything is one `DataFile`, `{ version: 1, tickets: Ticket[] }`. A `Ticket` has:
+`src/shared/types.ts` defines it. Everything is one `DataFile`, `{ version: 2, tickets: Ticket[] }`. A `Ticket` has:
 
 - `status`: `pending`, `in_progress` or `completed`.
 - `date`: a local calendar date `YYYY-MM-DD`, or `null` for the backlog.
 - `position`: its 0-based index within its list (its day, or the backlog). 0 is the highest priority.
+- `priority` (`high`, `normal` or `low`), `estimate` (free text) and `link` (a URL as typed): notes shown only in the focus view. `priority` doesn't affect list order. Empty `estimate`/`link` are `''`.
 
 Two rules hold after every change:
 
@@ -40,21 +41,25 @@ Two rules hold after every change:
 
 `tasks.json` is plain JSON on the user's disk, and it outlives every app version. A user can skip any number of releases and install the latest, so every release must read every data file any earlier release wrote, with no data loss. The `version` field is how the app tells the shapes apart.
 
-Today only version 1 exists, so there are no migrations yet. `parseDataFile` accepts only `version: 1`. Anything else, including a file from a newer app, is treated as corrupt: it is kept as `tasks.corrupt-<timestamp>.json` and the app starts empty.
+The current version is 2 (`CURRENT_VERSION` in `domain/migrate.ts`). `parseDataFile` parses the JSON, runs `migrate` (the step chain, `STEPS` in `migrate.ts`) up to the current version, then validates the result as the current version. It also returns the version found on disk, so storage knows a migration happened. A file with a missing or unknown version, including one from a newer app, is treated as corrupt: it is kept as `tasks.corrupt-<timestamp>.json` and the app starts empty.
+
+Shipped migrations:
+
+- **1 → 2:** sets `priority: 'normal'`, `estimate: ''` and `link: ''` on every ticket.
 
 Any change to the stored shape bumps `version` and ships a migration in the same PR. A shape change is anything an older file wouldn't satisfy or an older app would misread: a new required field, a removed or renamed field, a new allowed value, a changed meaning or format. The rules:
 
 - **One step per version.** A migration is a pure function in `src/domain/` that turns a version-`n` file into a version-`n+1` file. On load, the app runs the steps in order from the file's version up to the current one, then validates the result as the current version. A version-1 file opened by version 5 goes 1 → 2 → 3 → 4 → 5.
 - **Shipped migrations are frozen.** Once a release has shipped a version, its shape and its migration never change. Fix mistakes with a new version.
 - **Migrations keep data.** Every ticket and every field value survives, moved or converted into the new shape. Pick a default for a new field that matches what the old app meant (a ticket without a new `priority` field had normal priority).
-- **Back up before the first migrated save.** Before saving a file that was migrated, keep the original as `tasks.v<n>.backup.json` beside it, so a migration bug never costs the user their data.
-- **Test from a fixture.** Each migration gets a `*.test.ts` with a sample file of the old version, committed as it was written, that migrates to the expected new file. Keep a test that migrates the version-1 fixture all the way to the current version.
+- **Back up before the first migrated save.** Before saving a file that was migrated, keep the original as `tasks.v<n>.backup.json` beside it, so a migration bug never costs the user their data. `storage.ts` does this at load. If that name exists, it uses `tasks.v<n>.backup-<timestamp>.json` instead: a backup is never overwritten. If the backup can't be written, the load fails and nothing is saved.
+- **Test from a fixture.** Each migration gets a `*.test.ts` with a sample file of the old version, committed as it was written, that migrates to the expected new file. Keep a test that migrates the version-1 fixture all the way to the current version. Fixtures live in `src/domain/fixtures/`: `tasks.v<n>.json` is the old file and `tasks.v<n>.migrated.json` the expected result, both committed by hand, so a change to a step can't drift together with its test.
 - **Move the current version everywhere.** Update `DataFile` in `src/shared/types.ts`, `emptyDataFile` and `parseDataFile` in `domain/validate.ts`, and the data model above.
 
 ## Main process (`electron/`)
 
-- **`main.ts`** sets up a single-instance app with one window. The window is frameless on Linux and Windows, where the UI draws its own title bar and window buttons, and uses the native traffic lights on macOS. The window is locked down: context isolation and sandbox are on, Node integration is off, new windows are denied and navigation away from the app is blocked. It loads `dist/renderer/browser/index.html` from `file://`. With `--dev` it loads the Angular dev server at `http://localhost:4200` instead. The data directory is always `<appData>/quokka-tasks`, unless `--user-data-dir` is passed.
-- **`storage.ts`** reads and writes `tasks.json` in that directory. Writes are queued so the last save wins. Each write goes to a temp file, is fsynced and is then renamed over the real file, so a crash leaves either the old or the new file. If the file can't be parsed, it is renamed to `tasks.corrupt-<timestamp>.json` and the app starts empty with a notice.
+- **`main.ts`** sets up a single-instance app with one window. The window is frameless on Linux and Windows, where the UI draws its own title bar and window buttons, and uses the native traffic lights on macOS. The window is locked down: context isolation and sandbox are on, Node integration is off, new windows are denied and navigation away from the app is blocked. The one exit is links: a `target="_blank"` link to an `http(s)` URL (`isOpenableUrl` in `domain/links.ts`) is opened in the system browser by `setWindowOpenHandler` through `openInBrowser` (`electron/links.ts`, which ignores a failed open), and the window itself is still denied. It loads `dist/renderer/browser/index.html` from `file://`. With `--dev` it loads the Angular dev server at `http://localhost:4200` instead. The data directory is always `<appData>/quokka-tasks`, unless `--user-data-dir` is passed.
+- **`storage.ts`** reads and writes `tasks.json` in that directory. Writes are queued so the last save wins. Each write goes to a temp file, is fsynced and is then renamed over the real file, so a crash leaves either the old or the new file. If the file can't be parsed, it is renamed to `tasks.corrupt-<timestamp>.json` and the app starts empty with a notice. If it was migrated from an older version, `load()` first writes the original bytes to a backup (see below), then saves the migrated file, so the next launch doesn't migrate it again. If that save fails, the data still loads and the next save retries.
 - **`preload.ts`** exposes `window.api` (the `TasksApi` from `src/shared/api.ts`) through `contextBridge`. A sandboxed preload can only `require('electron')`, so it repeats the IPC channel names. A `satisfies` check makes the compiler prove they match `src/shared/api.ts`.
 
 ### IPC
@@ -84,7 +89,7 @@ The router uses hash URLs: `#/day/2026-11-26` and `#/week/2026-11-23`, where a w
 - **`DayPage`**: one day, as a list of `DayRow`s. On today, `NowBlock` shows the ticket to work on (`nowTicket` in `domain/day.ts`) and Up next lists the other open tickets. Other future days show a Planned list instead, and every day shows its Done list. Past days are read-only. Up next hides the Now ticket, so `upNextToIndex` maps its drop indexes back to positions in the day.
 - **`WeekPage`**: seven `TicketList`s, Monday to Sunday.
 - **`TicketList`** and **`TicketCard`**: a list of draggable cards with completed cards locked at the bottom, plus **`AddTicket`** for creating tickets. The backlog is a `TicketList` with date `null`.
-- **`FocusView`**: the modal ticket editor. Title, description, status and date are drafts until **Save** (disabled while the title is empty); closing the modal or the window without saving discards them. The date is a native date input plus a "No date (backlog)" checkbox. Past days are allowed only for completed tickets (`isDateAllowed`), so a draft that breaks the rule snaps to today with a note. Save goes through `saveTicketEdits` (`domain/tickets.ts`), which moves a ticket whose date changed to the end of the new list's open tickets and enforces the same rule. The modal also shows the created and updated dates. Delete asks first through **`ConfirmDialog`**.
+- **`FocusView`**: the modal ticket editor. Title, description, status, date, priority, estimate and link are drafts until **Save** (disabled while the title is empty); closing the modal or the window without saving discards them. The date is a native date input plus a "No date (backlog)" checkbox. Past days are allowed only for completed tickets (`isDateAllowed`), so a draft that breaks the rule snaps to today with a note. Save goes through `saveTicketEdits` (`domain/tickets.ts`), which moves a ticket whose date changed to the end of the new list's open tickets and enforces the same rule. The link field shows an **Open** link (`target="_blank"`) only when the draft is an `http(s)` URL; the main process opens it in the system browser. The modal also shows the created and updated dates. Delete asks first through **`ConfirmDialog`**.
 
 ## Build and packaging
 

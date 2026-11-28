@@ -1,8 +1,9 @@
-import { app, BrowserWindow, ipcMain, type IpcMainEvent, type IpcMainInvokeEvent } from 'electron';
+import { app, BrowserWindow, ipcMain, shell, type IpcMainEvent, type IpcMainInvokeEvent } from 'electron';
 import * as path from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { IPC } from '../src/shared/api';
 import type { DataFile } from '../src/shared/types';
+import { openInBrowser } from './links';
 import { createStore, type Store } from './storage';
 
 const DEV_URL = 'http://localhost:4200';
@@ -75,8 +76,12 @@ function createWindow(store: Store): BrowserWindow {
     const indexFile = path.join(app.getAppPath(), 'dist/renderer/browser/index.html');
     const ownUrl = isDev ? DEV_URL : pathToFileURL(indexFile).href;
 
-    // Offline lock-down: no new windows, no navigation away from the app.
-    win.webContents.setWindowOpenHandler(() => ({ action: 'deny' }));
+    // Lock-down: no new app windows and no navigation away from the app. An http(s) link opened from
+    // the UI (target="_blank") goes to the system browser; anything else is dropped.
+    win.webContents.setWindowOpenHandler(({ url }) => {
+        openInBrowser(url, u => shell.openExternal(u));
+        return { action: 'deny' };
+    });
     win.webContents.on('will-navigate', (event, url) => {
         if (!url.startsWith(ownUrl)) event.preventDefault();
     });
