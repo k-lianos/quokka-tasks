@@ -46,9 +46,7 @@ jobs:
 
             - run: npm ci
             - run: npm run build
-            - run: xvfb-run -a npm run test:e2e
-              env:
-                  CI: 'true'
+            - run: xvfb-run -a npm run test:e2e # GitHub sets CI=true: one worker, no test.only
 
             - uses: actions/upload-artifact@v4
               if: failure()

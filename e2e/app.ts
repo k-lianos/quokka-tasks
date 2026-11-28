@@ -7,12 +7,12 @@ import * as os from 'node:os';
 import * as path from 'node:path';
 import { addDays, startOfWeek, todayLocal, weekDates } from '../src/domain/dates';
 import { makeTicket } from '../src/domain/testUtils';
+import { BUILT_FILES, staleSource } from './build-check';
 import type { DataFile, Ticket } from '../src/shared/types';
 
 export { expect } from '@playwright/test';
 
 const repoRoot = path.resolve(__dirname, '..');
-const builtFiles = ['dist/electron/electron/main.js', 'dist/renderer/browser/index.html'];
 const CLOSE_TIMEOUT_MS = 5000;
 
 export interface Quokka {
@@ -39,11 +39,30 @@ export function dataFile(tickets: Ticket[]): DataFile {
     return { version: 3, tickets };
 }
 
-/** Launch the built app on `dir` and wait until it has loaded. */
-export async function launch(dir: string): Promise<{ app: ElectronApplication; page: Page }> {
-    for (const f of builtFiles) {
+let buildChecked = false;
+
+/** Fail clearly when dist/ is missing or older than the sources it was built from (checked once per worker). */
+function checkBuild(): void {
+    if (buildChecked) return;
+    for (const f of BUILT_FILES) {
         if (!existsSync(path.join(repoRoot, f))) throw new Error(`${f} is missing. Run npm run build first.`);
     }
+    const stale = staleSource(repoRoot);
+    if (stale) throw new Error(`dist/ is older than ${stale}. Run npm run build first.`);
+    buildChecked = true;
+}
+
+/** Wait for the app to finish loading: the header's Today button is up. */
+async function untilLoaded(_app: ElectronApplication, page: Page): Promise<void> {
+    await page.getByRole('button', { name: 'Today' }).waitFor();
+}
+
+/** Launch the built app on `dir` and wait until `ready` (by default: loaded). A launch that fails to get ready is closed. */
+export async function launch(
+    dir: string,
+    ready: (app: ElectronApplication, page: Page) => Promise<void> = untilLoaded,
+): Promise<{ app: ElectronApplication; page: Page }> {
+    checkBuild();
     if (!dir) throw new Error('launch needs a scratch data directory');
     const app = await _electron.launch({
         args: ['.', '--no-sandbox', '--lang=en-GB', `--user-data-dir=${dir}`],
@@ -51,9 +70,14 @@ export async function launch(dir: string): Promise<{ app: ElectronApplication; p
         // Chromium on Linux reads LANGUAGE before --lang and LANG, so pin every locale variable.
         env: { ...process.env, TZ: 'Europe/Athens', LANG: 'en_GB.UTF-8', LANGUAGE: 'en_GB', LC_ALL: 'en_GB.UTF-8' },
     });
-    const page = await app.firstWindow();
-    await page.getByRole('button', { name: 'Today' }).waitFor();
-    return { app, page };
+    try {
+        const page = await app.firstWindow();
+        await ready(app, page);
+        return { app, page };
+    } catch (e) {
+        await closeApp(app);
+        throw e;
+    }
 }
 
 const closedApps = new WeakSet<ElectronApplication>();
