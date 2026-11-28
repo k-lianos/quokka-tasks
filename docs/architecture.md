@@ -36,6 +36,21 @@ Two rules hold after every change:
 - **Rollover** (`domain/rollover.ts`): no open ticket has a date before today. Overdue tickets move to the top of today.
 - **Completed sink** (`sinkCompleted` in `domain/tickets.ts`): in every list, open tickets come first and completed ones after.
 
+### Versioning and migrations
+
+`tasks.json` is plain JSON on the user's disk, and it outlives every app version. A user can skip any number of releases and install the latest, so every release must read every data file any earlier release wrote, with no data loss. The `version` field is how the app tells the shapes apart.
+
+Today only version 1 exists, so there are no migrations yet. `parseDataFile` accepts only `version: 1`. Anything else, including a file from a newer app, is treated as corrupt: it is kept as `tasks.corrupt-<timestamp>.json` and the app starts empty.
+
+Any change to the stored shape bumps `version` and ships a migration in the same PR. A shape change is anything an older file wouldn't satisfy or an older app would misread: a new required field, a removed or renamed field, a new allowed value, a changed meaning or format. The rules:
+
+- **One step per version.** A migration is a pure function in `src/domain/` that turns a version-`n` file into a version-`n+1` file. On load, the app runs the steps in order from the file's version up to the current one, then validates the result as the current version. A version-1 file opened by version 5 goes 1 → 2 → 3 → 4 → 5.
+- **Shipped migrations are frozen.** Once a release has shipped a version, its shape and its migration never change. Fix mistakes with a new version.
+- **Migrations keep data.** Every ticket and every field value survives, moved or converted into the new shape. Pick a default for a new field that matches what the old app meant (a ticket without a new `priority` field had normal priority).
+- **Back up before the first migrated save.** Before saving a file that was migrated, keep the original as `tasks.v<n>.backup.json` beside it, so a migration bug never costs the user their data.
+- **Test from a fixture.** Each migration gets a `*.test.ts` with a sample file of the old version, committed as it was written, that migrates to the expected new file. Keep a test that migrates the version-1 fixture all the way to the current version.
+- **Move the current version everywhere.** Update `DataFile` in `src/shared/types.ts`, `emptyDataFile` and `parseDataFile` in `domain/validate.ts`, and the data model above.
+
 ## Main process (`electron/`)
 
 - **`main.ts`** sets up a single-instance app with one window. The window is frameless on Linux and Windows, where the UI draws its own title bar and window buttons, and uses the native traffic lights on macOS. The window is locked down: context isolation and sandbox are on, Node integration is off, new windows are denied and navigation away from the app is blocked. It loads `dist/renderer/browser/index.html` from `file://`. With `--dev` it loads the Angular dev server at `http://localhost:4200` instead. The data directory is always `<appData>/quokka-tasks`, unless `--user-data-dir` is passed.
