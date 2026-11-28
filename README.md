@@ -82,9 +82,9 @@ The app isn't signed with an Apple Developer ID, so on first launch macOS refuse
 ## CI and releases
 
 GitHub Actions runs `format:check`, the tests and the build on every pull request and on
-pushes to `main` (`.github/workflows/ci.yml`). `main` requires that check to pass. The tests
-and the build also run on Windows and macOS. A separate `e2e` job runs the end-to-end tests on
-Linux under a virtual display; on failure it uploads the Playwright report and traces.
+pushes to `main` (`.github/workflows/ci.yml`). The tests and the build also run on Windows and
+macOS. A separate `e2e` job runs the end-to-end tests on Linux under a virtual display; on failure
+it uploads the Playwright report and traces. `main` requires both `ci` and `e2e` to pass.
 
 Releases are git tags that publish the Linux `.deb` and `.zip`, the macOS `.zip` files and
 the Windows `.zip` as a GitHub Release. See
