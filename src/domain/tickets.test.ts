@@ -41,6 +41,10 @@ test('createTicket sets priority normal, empty estimate and link', () => {
     expect(r.find(t => t.id === 'n')).toMatchObject({ priority: 'normal', estimate: '', link: '' });
 });
 
+test('createTicket sets dueTime null', () => {
+    expect(createTicket(all, { id: 'n', title: 'New', date: null, now: NOW }).find(t => t.id === 'n')!.dueTime).toBeNull();
+});
+
 test('createTicket rejects whitespace-only titles', () => {
     expect(createTicket(all, { id: 'n', title: '   ', date: null, now: NOW })).toBe(all);
 });

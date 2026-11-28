@@ -37,6 +37,7 @@ export function createTicket(tickets: Ticket[], args: { id: string; title: strin
         priority: 'normal',
         estimate: '',
         link: '',
+        dueTime: null,
         date: args.date,
         position: listOf(tickets, args.date).length,
         createdAt: args.now,
