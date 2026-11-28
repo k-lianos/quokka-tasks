@@ -95,6 +95,11 @@ export function formatLongDate(date: string): string {
     return `${WEEKDAYS[d.getDay()]} ${d.getDate()} ${MONTHS[d.getMonth()]} ${d.getFullYear()}`;
 }
 
+/** An ISO timestamp (e.g. a ticket's createdAt) as a long local date, like 'Thu 26 Nov 2026'. */
+export function formatTimestamp(iso: string): string {
+    return formatLongDate(toLocalDate(new Date(iso)));
+}
+
 /** After the local date changes, keep following "this week" only if the user was looking at it. */
 export function nextViewedWeek(viewedWeekStart: string, oldToday: string, newToday: string): string {
     return viewedWeekStart === startOfWeek(oldToday) ? startOfWeek(newToday) : viewedWeekStart;

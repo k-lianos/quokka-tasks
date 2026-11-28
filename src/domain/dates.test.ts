@@ -4,6 +4,7 @@ import {
     formatDayHeader,
     formatDayHeading,
     formatLongDate,
+    formatTimestamp,
     formatWeekHeading,
     isValidDate,
     isoWeekNumber,
@@ -88,4 +89,8 @@ describe('day view dates', () => {
         expect(formatDayHeading('2026-11-26', '2026-11-26')).toEqual({ eyebrow: 'Thursday · Week 48', title: '26 November' });
         expect(formatDayHeading('2027-01-04', '2026-11-26')).toEqual({ eyebrow: 'Monday · Week 1', title: '4 January 2027' });
     });
+});
+
+test('formatTimestamp shows an ISO timestamp as a local long date', () => {
+    expect(formatTimestamp('2026-11-26T12:00:00.000Z')).toBe('Thu 26 Nov 2026');
 });

@@ -1,6 +1,6 @@
 import { Component, computed, effect, inject, input, output, signal, untracked } from '@angular/core';
-import { formatLongDate } from '../domain/dates';
-import { deleteTicket, updateTicket } from '../domain/tickets';
+import { formatLongDate, formatTimestamp } from '../domain/dates';
+import { deleteTicket, isDateAllowed, saveTicketEdits } from '../domain/tickets';
 import { STATUS_LABEL, STATUSES, type Status, type Ticket } from '../shared/types';
 import { ConfirmDialog } from './confirm-dialog';
 import { TasksStore } from './tasks.store';
@@ -11,7 +11,7 @@ import { TasksStore } from './tasks.store';
     imports: [ConfirmDialog],
     host: { '(document:keydown.escape)': 'onEscape()' },
     template: `
-        <div class="dialog-backdrop" (click)="$event.target === $event.currentTarget && close()">
+        <div class="dialog-backdrop" (click)="onBackdropClick($event)">
             <div class="dialog focus-view" role="dialog" aria-modal="true" aria-label="Ticket">
                 <div class="focus-header">
                     <span class="focus-date">{{ dateLabel() }}</span>
@@ -41,17 +41,41 @@ import { TasksStore } from './tasks.store';
 
                 <label class="field">
                     <span>Status</span>
-                    <select [value]="status()" (change)="status.set($any($event.target).value)">
+                    <select [value]="status()" (change)="setStatus($any($event.target).value)">
                         @for (s of statuses; track s) {
                             <option [value]="s" [selected]="s === status()">{{ statusLabel[s] }}</option>
                         }
                     </select>
                 </label>
 
+                <div class="field">
+                    <span id="focus-date-label">Date</span>
+                    <div class="field-date">
+                        <input
+                            #dateInput
+                            type="date"
+                            aria-labelledby="focus-date-label"
+                            [value]="date() ?? ''"
+                            [attr.min]="minDate()"
+                            [disabled]="date() === null"
+                            (change)="onDateInput(dateInput)"
+                        />
+                        <label class="checkbox">
+                            <input type="checkbox" [checked]="date() === null" (change)="setBacklog($any($event.target).checked)" />
+                            No date (backlog)
+                        </label>
+                    </div>
+                </div>
+                @if (dateNote()) {
+                    <p class="field-note">Past dates are only for completed tickets</p>
+                }
+
                 <label class="field field-grow">
                     <span>Description</span>
                     <textarea [value]="description()" (input)="description.set($any($event.target).value)"></textarea>
                 </label>
+
+                <p class="focus-meta">Created {{ created() }} · Updated {{ updated() }}</p>
 
                 <div class="dialog-actions">
                     <button type="button" class="button button-danger" (click)="confirming.set(true)">Delete</button>
@@ -80,7 +104,12 @@ export class FocusView {
     protected readonly title = signal('');
     protected readonly description = signal('');
     protected readonly status = signal<Status>('pending');
+    protected readonly date = signal<string | null>(null);
+    protected readonly dateNote = signal(false);
     protected readonly confirming = signal(false);
+    protected readonly minDate = computed(() => (this.status() === 'completed' ? null : this.store.today()));
+    protected readonly created = computed(() => formatTimestamp(this.ticket().createdAt));
+    protected readonly updated = computed(() => formatTimestamp(this.ticket().updatedAt));
     protected readonly titleInvalid = computed(() => !this.title().trim());
     protected readonly dateLabel = computed(() => {
         const date = this.ticket().date;
@@ -95,6 +124,8 @@ export class FocusView {
                 this.title.set(this.ticket().title);
                 this.description.set(this.ticket().description);
                 this.status.set(this.ticket().status);
+                this.date.set(this.ticket().date);
+                this.dateNote.set(false);
             });
         });
     }
@@ -102,8 +133,45 @@ export class FocusView {
     protected save(): void {
         if (this.titleInvalid()) return;
         const id = this.ticket().id;
-        const patch = { title: this.title(), description: this.description(), status: this.status() };
-        void this.store.change(t => updateTicket(t, id, patch, new Date().toISOString()));
+        const edits = { title: this.title(), description: this.description(), status: this.status(), date: this.date() };
+        void this.store.change(t => saveTicketEdits(t, id, edits, this.store.today(), new Date().toISOString()));
+    }
+
+    protected setStatus(status: Status): void {
+        this.status.set(status);
+        if (!isDateAllowed(this.date(), status, this.store.today())) this.snapToToday();
+    }
+
+    /** Clearing the native input emits '' — keep the previous draft; only the checkbox means backlog. */
+    protected onDateInput(input: HTMLInputElement): void {
+        const value = input.value;
+        if (!value) {
+            input.value = this.date() ?? '';
+            return;
+        }
+        if (isDateAllowed(value, this.status(), this.store.today())) {
+            this.date.set(value);
+            this.dateNote.set(false);
+        } else {
+            this.snapToToday();
+            input.value = this.store.today();
+        }
+    }
+
+    protected setBacklog(backlog: boolean): void {
+        this.date.set(backlog ? null : this.store.today());
+        this.dateNote.set(false);
+    }
+
+    private snapToToday(): void {
+        this.date.set(this.store.today());
+        this.dateNote.set(true);
+    }
+
+    /** Returns nothing on purpose: a handler that returns false makes Angular call preventDefault(),
+     *  which would stop the checkbox inside the dialog from toggling. */
+    protected onBackdropClick(event: MouseEvent): void {
+        if (event.target === event.currentTarget) this.close();
     }
 
     protected close(): void {
