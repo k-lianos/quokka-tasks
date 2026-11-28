@@ -25,7 +25,7 @@ const CLICK_AFTER_DRAG_MS = 150;
             }
 
             @if (!isPast()) {
-                <section class="day-section">
+                <section class="day-section" [attr.aria-label]="isToday() ? 'Up next' : 'Planned'">
                     <h2 class="day-section-heading">{{ isToday() ? 'Up next' : 'Planned' }}</h2>
                     <!-- Now is shown above, not in this list, so drop indexes are mapped with upNextToIndex. -->
                     <div
@@ -56,7 +56,7 @@ const CLICK_AFTER_DRAG_MS = 150;
             }
 
             @if (done().length) {
-                <section class="day-section">
+                <section class="day-section" aria-label="Done">
                     <h2 class="day-section-heading">Done</h2>
                     @for (t of done(); track t.id) {
                         <app-day-row class="is-locked" [ticket]="t" (open)="board.open(t.id)" />

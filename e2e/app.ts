@@ -1,11 +1,11 @@
 // The e2e fixture: each test launches the built app on its own scratch data directory, so real data
 // (~/.config/quokka-tasks) is never touched. Seed dates are relative to the real today.
-import { _electron, test as base, type ElectronApplication, type Page } from '@playwright/test';
+import { _electron, test as base, type ElectronApplication, type Locator, type Page } from '@playwright/test';
 import { existsSync } from 'node:fs';
 import * as fs from 'node:fs/promises';
 import * as os from 'node:os';
 import * as path from 'node:path';
-import { addDays, todayLocal } from '../src/domain/dates';
+import { addDays, startOfWeek, todayLocal, weekDates } from '../src/domain/dates';
 import { makeTicket } from '../src/domain/testUtils';
 import type { DataFile, Ticket } from '../src/shared/types';
 
@@ -95,3 +95,20 @@ export const test = base.extend<{ seed: DataFile | string | null; quokka: Quokka
         }
     },
 });
+
+/** The seven dates, Monday to Sunday, of the current week plus `offsetWeeks`. */
+export function weekOf(offsetWeeks: number): string[] {
+    return weekDates(addDays(startOfWeek(todayLocal()), 7 * offsetWeeks));
+}
+
+/** A named ticket list: a week column (`formatDayHeader(date)`, e.g. 'Mon 23'), 'Backlog', or a Day section. */
+export function list(page: Page, name: string): Locator {
+    return page.getByRole('region', { name, exact: true });
+}
+
+/** Navigate by setting the hash, like a typed URL. */
+export async function goTo(page: Page, hash: string): Promise<void> {
+    await page.evaluate(h => {
+        location.hash = h;
+    }, hash);
+}
